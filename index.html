@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainee Info Card Generator</title>
+<style>
+:root {
+ --primary-color: #38bdf8;
+ --primary-hover-color: #7dd3fc;
+ --accent-color: #f97316;
+ --accent-hover-color: #fb923c;
+ --background-color: #0f172a;
+ --container-bg-color: #1e293b;
+ --input-bg-color: #334155;
+ --text-color: #f1f5f9;
+ --text-muted-color: #94a3b8;
+ --border-color: #475569;
+ --success-color: #4ade80;
+ --success-bg-color: rgba(74, 222, 128, 0.1);
+ --error-color: #f87171;
+ --error-bg-color: rgba(248, 113, 113, 0.1);
+ --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+ --border-radius: 0.5rem;
+ --transition-speed: 0.2s;
+}
+html { font-size: 24px; }
+body {
+ font-family: var(--font-family);
+ color: var(--text-color);
+ background-color: var(--background-color);
+ margin: 0;
+ padding: 0;
+ height: 100dvh;
+ display: flex;
+ flex-direction: column;
+ overflow: hidden;
+}
+*, *::before, *::after { box-sizing: border-box; }
+.app-header {
+ flex-shrink: 0;
+ padding: 0.75rem 1rem;
+ background-color: var(--background-color);
+}
+.app-title {
+ text-align: center;
+ color: var(--text-color);
+ font-size: clamp(2.5rem, 7vw, 3.5rem);
+ font-weight: 700;
+ margin: 0;
+}
+.dialog-container {
+ flex-grow: 1;
+ width: 100%;
+ max-width: 1200px;
+ margin: 0 auto;
+ padding: 0 0rem;
+ display: flex;
+ flex-direction: column;
+ overflow: hidden;
+}
+.app-view {
+ display: none;
+ flex-direction: column;
+ gap: 1rem;
+ height: 100%;
+ animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.panels-container {
+ display: flex;
+ flex-direction: column;
+ gap: 1rem;
+ flex-grow: 1;
+ overflow: hidden;
+}
+.section {
+ background-color: var(--container-bg-color);
+ border: 1px solid var(--border-color);
+ border-radius: var(--border-radius);
+ padding: 0.75rem;
+ display: flex;
+ flex-direction: column;
+ gap: 0.75rem;
+ overflow: hidden;
+ flex: 1;
+}
+#landing-page .section { width: 100%; }
+.section-header {
+ padding-bottom: 0.5rem;
+ border-bottom: 1px solid var(--border-color);
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ flex-shrink: 0;
+ gap: 0.75rem;
+}
+.section-title { font-size: 1.5rem; font-weight: 600; flex-grow: 1; }
+.header-checkbox { width: 1.5rem; height: 1.5rem; flex-shrink: 0; accent-color: var(--primary-color); cursor: pointer; }
+.checkbox-list-wrapper {
+ overflow-y: auto;
+ flex-grow: 1;
+ background-color: var(--input-bg-color);
+ border-radius: var(--border-radius);
+ border: 1px solid var(--border-color);
+ padding: 0.25rem;
+}
+.checkbox-list-wrapper label {
+ display: flex; align-items: center; gap: 0.75rem; padding: 1.2rem;
+ border-radius: var(--border-radius); cursor: pointer;
+ transition: background-color var(--transition-speed); font-size: 1.3rem; color: var(--text-color);
+}
+.checkbox-list-wrapper label:hover { background-color: var(--border-color); color: var(--text-color); }
+.checkbox-list-wrapper input[type="checkbox"] { width: 2rem; height: 2rem; flex-shrink: 0; accent-color: var(--primary-color); }
+.button {
+ display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+ border: 1px solid transparent; padding: 1.7rem 2.5rem; border-radius: var(--border-radius);
+ cursor: pointer; font-size: 1.8rem; font-weight: 600; width: 100%; text-align: center;
+ transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+}
+.button:disabled { opacity: 0.5; cursor: not-allowed; }
+.button-primary { background-color: var(--primary-color); color: var(--background-color); }
+.button-primary:not(:disabled):hover { background-color: var(--primary-hover-color); }
+.button-secondary { background-color: var(--input-bg-color); color: var(--text-color); border-color: var(--border-color); }
+.button-secondary:not(:disabled):hover { background-color: var(--border-color); }
+.button-accent { background-color: var(--accent-color); color: var(--background-color); }
+.button-accent:not(:disabled):hover { background-color: var(--accent-hover-color); }
+.button-small { padding: 0.5rem 1rem; font-size: 1rem; font-weight: 500; }
+.button.active { background-color: var(--primary-color); color: var(--background-color); border-color: var(--primary-color); }
+.button.active:hover { background-color: var(--primary-hover-color); }
+.button-group { display: flex; flex-direction: column; gap: 0.75rem; flex-shrink: 0; padding-top: 0.5rem; }
+#loader { align-items: center; justify-content: center; gap: 1rem; color: var(--text-muted-color); font-size: 1.5rem; }
+.spinner { width: 70px; height: 70px; border: 7px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.result-list { display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; flex-grow: 1; }
+.result-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem; border-radius: var(--border-radius); border: 1px solid; font-size: 1.2rem; word-break: break-word; flex-shrink: 0; }
+.result-item.success { background-color: var(--success-bg-color); border-color: var(--success-color); }
+.result-item.success a { color: var(--primary-hover-color); text-decoration: none; }
+.result-item.success a:hover { text-decoration: underline; }
+.result-item.error { background-color: var(--error-bg-color); border-color: var(--error-color); }
+.result-item .icon svg { width: 28px; height: 28px; }
+.search-input { width: 100%; padding: 0.75rem; font-size: 1.2rem; background-color: var(--input-bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); margin-bottom: 0.5rem; }
+.search-input::placeholder { color: var(--text-muted-color); }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: flex-start; justify-content: center; z-index: 1000; }
+.modal-content { background-color: var(--container-bg-color); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); width: 90%; max-width: 450px; display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+.modal-title { font-size: 1.5rem; font-weight: 600; margin: 0; }
+.modal-input { background-color: var(--input-bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 0.75rem; font-size: 1.2rem; width: 100%; }
+.modal-error { color: var(--error-color); font-size: 1rem; text-align: center; min-height: 1.2rem; }
+.modal-buttons { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.modal-buttons .button { width: auto; padding: 0.8rem 1.5rem; font-size: 1.2rem; }
+.password-change-form { display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; overflow-y: auto; padding: 0.5rem; }
+.password-section-label { font-size: 1.2rem; font-weight: 600; color: var(--text-color); margin-top: 0.75rem; }
+.password-change-form .divider { border: none; height: 1px; background-color: var(--border-color); margin: 1rem 0; }
+@media (min-width: 768px) {
+ .panels-container { flex-direction: row; }
+ #landing-page .button-group { flex-direction: column; align-items: center; }
+ #main-app-content .button-group, #app-results-view .button-group, #settings-page .button-group { flex-direction: row-reverse; justify-content: flex-start; }
+ .button { width: auto; }
+ #landing-page .button { width: 100%; max-width: 540px; }
+}
+</style>
+</head>
+<body>
+<header class="app-header">
+<h1 class="app-title">Trainee Info Card Generator</h1>
+</header>
+<div class="dialog-container">
+<div id="loader" class="app-view">
+ <div class="spinner"></div>
+ <span id="loader-message">Loading data...</span>
+</div>
+<div id="landing-page" class="app-view" style="display: flex; justify-content: center; align-items: center;">
+  <div class="section">
+     <div class="section-header"><h2 class="section-title">Select Volunteer Profile</h2></div>
+     <div class="button-group">
+         <button class="button button-primary" onclick="promptForPassword('Regular Volunteer')">Regular Volunteer</button>
+         <button class="button button-primary" onclick="promptForPassword('Adhoc Volunteer')">Adhoc Volunteer / Exposure Session</button>
+         <button id="settingsButton" class="button button-secondary" onclick="promptForPassword('Settings')" style="margin-top: 1rem;">Settings</button>
+     </div>
+ </div>
+</div>
+<main id="main-app-content" class="app-view">
+ <div id="app-v1-content" class="app-view">
+      <div class="panels-container">
+          <div class="section">
+             <div class="section-header">
+                 <input type="checkbox" id="checkAllTrainees" class="header-checkbox" title="Select/Deselect All">
+                 <h2 class="section-title">Select Trainee(s)</h2>
+                 <span id="traineeCountText" class="count-display"></span>
+             </div>
+             <input type="text" id="traineeSearchV1" class="search-input" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV1', 'traineeSelectionContainer')">
+             <div class="checkbox-list-wrapper">
+                 <div id="traineeSelectionContainer" class="checkbox-list"></div>
+             </div>
+          </div>
+          <div class="section" id="field-selection-section">
+             <div class="section-header">
+                  <input type="checkbox" id="checkAllFields" class="header-checkbox" title="Select/Deselect All">
+                  <h2 class="section-title">Select Fields</h2>
+                  <button id="defaultFieldsButton" class="button button-small button-secondary">Default Fields</button>
+             </div>
+             <input type="text" id="fieldSearchV1" class="search-input" placeholder="Search fields..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
+             <div class="checkbox-list-wrapper">
+                 <div id="fieldSelectionContainer" class="checkbox-list"></div>
+             </div>
+          </div>
+      </div>
+      <div class="button-group">
+         <button id="generateButton" class="button button-primary" onclick="handleGenerate()">Generate Card(s)</button>
+         <button id="backToProfilesButtonV1" class="button button-secondary" onclick="goToLandingPage()">Back</button>
+     </div>
+ </div>
+ <div id="app-v2-content" class="app-view">
+      <div class="section">
+         <div class="section-header">
+             <input type="checkbox" id="checkAllTraineesV2" class="header-checkbox" title="Select/Deselect All">
+             <h2 class="section-title">Select Trainee(s)</h2>
+             <span id="traineeCountTextV2" class="count-display"></span>
+         </div>
+         <input type="text" id="traineeSearchV2" class="search-input" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV2', 'traineeSelectionContainerV2')">
+         <div class="checkbox-list-wrapper">
+             <div id="traineeSelectionContainerV2" class="checkbox-list"></div>
+         </div>
+      </div>
+      <div class="button-group">
+         <button id="generateButtonV2" class="button button-primary" onclick="handleGenerateV2()">Generate Card(s)</button>
+         <button id="backToProfilesButtonV2" class="button button-secondary" onclick="goToLandingPage()">Back</button>
+     </div>
+ </div>
+</main>
+<div id="app-results-view" class="app-view">
+ <div class="section">
+     <div class="section-header"> <h2 class="section-title">Generation Results</h2> </div>
+     <div id="resultMessage" class="result-list"></div>
+  </div>
+  <div class="button-group">
+     <button id="backToSelectionsButton" class="button button-primary" onclick="backToSelections()">Back to Selections</button>
+     <button id="backToProfilesButtonResults" class="button button-secondary" onclick="goToLandingPage()">Back to Profiles</button>
+ </div>
+</div>
+<div id="settings-page" class="app-view">
+ <div class="panels-container">
+     <div class="section">
+         <div class="section-header">
+             <input type="checkbox" id="checkAllSettingsRegular" class="header-checkbox" title="Select/Deselect All">
+             <h2 class="section-title">Regular Volunteer Fields</h2>
+         </div>
+         <input type="text" id="settingsRegularSearch" class="search-input" placeholder="Search fields..." onkeyup="filterList('settingsRegularSearch', 'settings-regular-fields')">
+         <div id="settings-regular-fields" class="checkbox-list-wrapper"></div>
+     </div>
+     <div class="section">
+         <div class="section-header">
+             <input type="checkbox" id="checkAllSettingsAdhoc" class="header-checkbox" title="Select/Deselect All">
+             <h2 class="section-title">Adhoc / Exposure Fields</h2>
+         </div>
+         <input type="text" id="settingsAdhocSearch" class="search-input" placeholder="Search fields..." onkeyup="filterList('settingsAdhocSearch', 'settings-adhoc-fields')">
+         <div id="settings-adhoc-fields" class="checkbox-list-wrapper"></div>
+     </div>
+     <div class="section">
+         <div class="section-header">
+             <h2 class="section-title">Change Passwords</h2>
+         </div>
+         <div class="password-change-form">
+             <label for="new-reg-pass" class="password-section-label">Regular Volunteer Password</label>
+             <input type="password" id="new-reg-pass" class="modal-input">
+             <hr class="divider">
+             <label for="new-adhoc-pass" class="password-section-label">Adhoc Volunteer Password</label>
+             <input type="password" id="new-adhoc-pass" class="modal-input">
+             <hr class="divider">
+             <label for="new-settings-pass" class="password-section-label">New Settings Password</label>
+             <input type="password" id="new-settings-pass" class="modal-input">
+             <label for="confirm-settings-pass" class="password-section-label">Confirm Settings Password</label>
+             <input type="password" id="confirm-settings-pass" class="modal-input">
+             <p id="password-change-error" class="modal-error"></p>
+         </div>
+     </div>
+ </div>
+ <div class="button-group">
+     <button class="button button-primary" onclick="handleUpdatePasswords()">Update Passwords</button>
+     <button class="button button-accent" onclick="handleSaveSettings()">Save Field Settings</button>
+     <button class="button button-secondary" onclick="goToLandingPage()">Back</button>
+ </div>
+</div>
+</div>
+<div id="password-modal" class="modal-overlay">
+<div class="modal-content">
+ <h3 id="password-modal-title" class="modal-title">Enter Password</h3>
+ <p id="password-modal-error" class="modal-error"></p>
+ <input id="password-input" type="password" class="modal-input" placeholder="Password..." onkeydown="if(event.key === 'Enter') handlePasswordSubmit();">
+ <div class="modal-buttons">
+     <button class="button button-secondary" onclick="closePasswordModal()">Cancel</button>
+     <button class="button button-primary" onclick="handlePasswordSubmit()">Submit</button>
+ </div>
+</div>
+</div>
+
+<script>
+// ==========================================
+// CONFIGURATION
+// ==========================================
+// 1. Deploy the Apps Script as a Web App (Execute as: "Me", Access: "Anyone").
+// 2. Paste the Web App URL below:
+const GAS_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; 
+
+// ==========================================
+
+// Global state variables
+let availableFields = [], allTrainees =[], appSettings = {};
+let totalTrainees = 0, previousAppView = '', selectedProfileForAppV1 = 'Regular Volunteer';
+let profileOrSettingsToAuth = '', currentProfile = '';
+let areDefaultsSelected = true;
+const fieldsToExclude =["Project", "Trainee's Short Name", "Links for House Visit", "Map Link to Trainee's House", "SGEnable Concession Card CAN Number", "Links", "Contact Details (Home / Office / Mobile)", "Trainee's Photo"];
+const fieldNameUpdates = { "Primary Contact Name": "Contact 1 Relation (Name)", "Contact 3 Relation / Name": "Contact 3 Relation (Name)", "Age (Current Year)": "Age", "Spoken Language": "Spoken Language / Dialect" };
+let defaultFieldHeadersForAppV2Values =[];
+
+/**
+ * Utility function to handle requests to the GAS backend.
+ * Uses `text/plain` to seamlessly bypass CORS pre-flight checks while sending a JSON payload.
+ */
+async function callBackend(action, payload = {}) {
+  try {
+    const response = await fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({ action, payload })
+    });
+    const result = await response.json();
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    return result.data;
+  } catch (error) {
+    console.error("Backend Error:", error);
+    throw error;
+  }
+}
+
+/**
+* Filters a list and syncs the state of the "Select All" checkbox.
+*/
+function filterList(inputId, containerId) {
+ const input = document.getElementById(inputId);
+ const filter = input.value.toUpperCase();
+ const container = document.getElementById(containerId);
+ const items = container.getElementsByTagName('label');
+ let allVisibleAreChecked = true;
+ let visibleCount = 0;
+ for (let i = 0; i < items.length; i++) {
+   const span = items[i].getElementsByTagName('span')[0];
+   if (span) {
+     const txtValue = span.textContent || span.innerText;
+     if (txtValue.toUpperCase().indexOf(filter) > -1) {
+       items[i].style.display = "flex";
+       visibleCount++;
+       if (!items[i].querySelector('input').checked) {
+         allVisibleAreChecked = false;
+       }
+     } else {
+       items[i].style.display = "none";
+     }
+   }
+ }
+ let checkAllBox;
+ if (containerId.includes('traineeSelectionContainerV2')) checkAllBox = document.getElementById('checkAllTraineesV2');
+ else if (containerId.includes('traineeSelectionContainer')) checkAllBox = document.getElementById('checkAllTrainees');
+ else if (containerId.includes('fieldSelectionContainer')) checkAllBox = document.getElementById('checkAllFields');
+ else if (containerId.includes('settings-regular-fields')) checkAllBox = document.getElementById('checkAllSettingsRegular');
+ else if (containerId.includes('settings-adhoc-fields')) checkAllBox = document.getElementById('checkAllSettingsAdhoc');
+ if (checkAllBox) {
+   checkAllBox.checked = visibleCount > 0 && allVisibleAreChecked;
+ }
+}
+
+/**
+* Main entry point on window load. 
+*/
+window.onload = () => {
+ setLoadingState(true, 'Loading data...');
+ callBackend('getInitialData')
+   .then(data => {
+     appSettings = data.appSettings;
+     allTrainees = data.allTrainees;
+     availableFields = data.availableFields;
+     setLoadingState(false);
+     switchView('landing-page');
+   })
+   .catch(err => {
+     showError(err.message);
+     document.getElementById('loader-message').textContent = `Error loading settings: ${err.message}`;
+   });
+};
+
+function switchView(viewId) {
+ document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
+ document.getElementById(viewId).style.display = 'flex';
+}
+
+function setLoadingState(isLoading, message = 'Loading...') {
+ document.querySelectorAll('.button, input').forEach(el => el.disabled = isLoading);
+ if (isLoading) {
+   document.getElementById('loader-message').textContent = message;
+   switchView('loader');
+ }
+}
+
+function promptForPassword(target) {
+ profileOrSettingsToAuth = target;
+ const modal = document.getElementById('password-modal');
+ const title = document.getElementById('password-modal-title');
+ const input = document.getElementById('password-input');
+ const error = document.getElementById('password-modal-error');
+ let displayName = target === 'Adhoc Volunteer' ? 'Adhoc Volunteer / Exposure Session' : target;
+ title.textContent = `Enter Password for ${displayName}`;
+ error.textContent = '';
+ input.value = '';
+ modal.style.display = 'flex';
+ input.focus();
+}
+
+function closePasswordModal() {
+ document.getElementById('password-modal').style.display = 'none';
+ document.activeElement.blur();
+}
+
+function handlePasswordSubmit() {
+ const password = document.getElementById('password-input').value;
+ if (!password) {
+   document.getElementById('password-modal-error').textContent = 'Password cannot be empty.';
+   return;
+ }
+ setLoadingState(true, 'Verifying...');
+ 
+ const action = profileOrSettingsToAuth === 'Settings' ? 'verifySettingsPassword' : 'verifyPassword';
+ const payload = profileOrSettingsToAuth === 'Settings' ? { password } : { profile: profileOrSettingsToAuth, password };
+
+ callBackend(action, payload)
+   .then(isValid => {
+     if (isValid) {
+       closePasswordModal();
+       if (profileOrSettingsToAuth === 'Settings') {
+         loadSettingsPage();
+       } else {
+         currentProfile = profileOrSettingsToAuth;
+         const appVersion = profileOrSettingsToAuth === 'Regular Volunteer' ? 'AppV1' : 'AppV2';
+         loadApp(appVersion, currentProfile);
+       }
+     } else {
+       setLoadingState(false);
+       document.getElementById('password-modal-error').textContent = 'Incorrect password. Please try again.';
+       document.getElementById('password-input').select();
+     }
+     document.activeElement.blur();
+   })
+   .catch(err => {
+     setLoadingState(false);
+     showError(`${profileOrSettingsToAuth} password verification failed: ${err.message}`);
+     document.activeElement.blur();
+   });
+}
+
+function processAvailableFields(fields) {
+ let processedFields = fields
+   .filter(field => !fieldsToExclude.includes(field.label))
+   .map(field => fieldNameUpdates[field.label] ? { label: fieldNameUpdates[field.label], value: field.value } : field);
+ const contactFieldLabels =["Contact 1 Relation (Name)", "Contact 1 Number", "Contact 2 Relation (Name)", "Contact 2 Number", "Contact 3 Relation (Name)", "Contact 3 Number"];
+ if (processedFields.some(f => contactFieldLabels.includes(f.label))) {
+   processedFields = processedFields.filter(f => !contactFieldLabels.includes(f.label));
+   const careGiverField = { label: 'Caregiver Contact Info', value: 'caregiverContactInfo' };
+   const addressIndex = processedFields.findIndex(f => f.label === 'Address');
+   processedFields.splice(addressIndex !== -1 ? addressIndex + 1 : processedFields.length, 0, careGiverField);
+ }
+ return processedFields;
+}
+
+function loadSettingsPage() {
+ availableFields = processAvailableFields(availableFields);
+ populateSettingsForm();
+ switchView('settings-page');
+ setLoadingState(false);
+}
+
+function populateSettingsForm() {
+ const regularContainer = document.getElementById('settings-regular-fields');
+ const adhocContainer = document.getElementById('settings-adhoc-fields');
+ const allAvailableFields =[...new Set(availableFields.map(f => f.label))].sort();
+ const regularDefaults = appSettings.profileDefaultFieldMappings['Regular Volunteer'] || [];
+ const adhocDefaults = appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] || [];
+ let regularHtml = [];
+ let adhocHtml =[];
+ allAvailableFields.forEach(fieldLabel => {
+   const regularId = `setting-reg-${fieldLabel.replace(/\W/g, '_')}`;
+   const adhocId = `setting-adhoc-${fieldLabel.replace(/\W/g, '_')}`;
+   const regularChecked = regularDefaults.includes(fieldLabel) ? 'checked' : '';
+   regularHtml.push(`<label for="${regularId}"><input type="checkbox" value="${fieldLabel}" id="${regularId}" ${regularChecked}><span>${fieldLabel}</span></label>`);
+   const adhocChecked = adhocDefaults.includes(fieldLabel) ? 'checked' : '';
+   adhocHtml.push(`<label for="${adhocId}"><input type="checkbox" value="${fieldLabel}" id="${adhocId}" ${adhocChecked}><span>${fieldLabel}</span></label>`);
+ });
+ regularContainer.innerHTML = regularHtml.join('');
+ adhocContainer.innerHTML = adhocHtml.join('');
+ document.getElementById('checkAllSettingsRegular').addEventListener('change', function() {
+   document.querySelectorAll('#settings-regular-fields input[type="checkbox"]').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
+ });
+ document.getElementById('checkAllSettingsAdhoc').addEventListener('change', function() {
+   document.querySelectorAll('#settings-adhoc-fields input[type="checkbox"]').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
+ });['new-reg-pass', 'new-adhoc-pass', 'new-settings-pass', 'confirm-settings-pass'].forEach(id => document.getElementById(id).value = '');
+ document.getElementById('password-change-error').textContent = '';
+}
+
+function handleSaveSettings() {
+ setLoadingState(true, "Saving field settings...");
+ const newMappings = {
+   "Regular Volunteer": Array.from(document.querySelectorAll('#settings-regular-fields input:checked')).map(cb => cb.value),
+   "Adhoc Volunteer / Exposure Session": Array.from(document.querySelectorAll('#settings-adhoc-fields input:checked')).map(cb => cb.value)
+ };
+ callBackend('saveAppSettings', { newMappings })
+   .then(() => goToLandingPage()) 
+   .catch(err => {
+     setLoadingState(false);
+     showError(err.message);
+   });
+}
+
+function handleUpdatePasswords() {
+ const newRegPass = document.getElementById('new-reg-pass').value;
+ const newAdhocPass = document.getElementById('new-adhoc-pass').value;
+ const newSettingsPass = document.getElementById('new-settings-pass').value;
+ const confirmSettingsPass = document.getElementById('confirm-settings-pass').value;
+ const errorEl = document.getElementById('password-change-error');
+ errorEl.textContent = '';
+ if (newSettingsPass && newSettingsPass !== confirmSettingsPass) {
+   errorEl.textContent = 'New Settings passwords do not match.';
+   return;
+ }
+ const passwordsToUpdate = {};
+ if (newRegPass) passwordsToUpdate['Regular Volunteer'] = newRegPass;
+ if (newAdhocPass) passwordsToUpdate['Adhoc Volunteer'] = newAdhocPass;
+ if (newSettingsPass) passwordsToUpdate['Settings'] = newSettingsPass;
+ if (Object.keys(passwordsToUpdate).length === 0) {
+   errorEl.textContent = 'Please enter a new password in at least one field.';
+   return;
+ }
+ setLoadingState(true, 'Updating passwords...');
+ callBackend('updatePasswords', { passwords: passwordsToUpdate })
+   .then(message => {
+     errorEl.style.color = 'var(--success-color)';
+     errorEl.textContent = message;
+     setTimeout(goToLandingPage, 2000);
+   })
+   .catch(err => {
+     setLoadingState(false);
+     errorEl.textContent = `Error: ${err.message}`;
+   });
+}
+
+function loadApp(appVersion, profile = '') {
+ availableFields = processAvailableFields(availableFields);
+ const adhocLabels = appSettings.profileDefaultFieldMappings["Adhoc Volunteer / Exposure Session"];
+ defaultFieldHeadersForAppV2Values = availableFields.filter(f => adhocLabels.includes(f.label)).map(f => f.value);
+ switchView('main-app-content');
+ document.getElementById('app-v1-content').style.display = (appVersion === 'AppV1') ? 'flex' : 'none';
+ document.getElementById('app-v2-content').style.display = (appVersion === 'AppV2') ? 'flex' : 'none';
+ if (appVersion === 'AppV1') initializeAppV1(profile);
+ else initializeAppV2();
+ setLoadingState(false);
+}
+
+function initializeAppV1(profile) {
+ selectedProfileForAppV1 = profile;
+ populateTraineesForView('AppV1');
+ populateFieldsForAppV1();
+ areDefaultsSelected = true;
+ const defaultButton = document.getElementById('defaultFieldsButton');
+ defaultButton.classList.add('active');
+ defaultButton.onclick = handleDefaultFieldsToggle;
+ updateFieldsBasedOnDefaults();
+}
+
+function initializeAppV2() {
+ populateTraineesForView('AppV2');
+}
+
+function populateTraineesForView(view) {
+ const containerId = view === 'AppV1' ? 'traineeSelectionContainer' : 'traineeSelectionContainerV2';
+ const checkAllId = view === 'AppV1' ? 'checkAllTrainees' : 'checkAllTraineesV2';
+ const container = document.getElementById(containerId);
+ totalTrainees = allTrainees.length;
+ if (totalTrainees === 0) {
+   container.innerHTML = '<div style="padding:0.5em;text-align:center;color:var(--text-muted-color);">No active trainees found.</div>';
+   return;
+ }
+ const traineeHtml = allTrainees.map(t => {
+   const id = `${view.toLowerCase()}-trainee-${t.replace(/\W/g, '_')}`;
+   return `<label for="${id}"><input type="checkbox" value="${t}" id="${id}"><span>${t}</span></label>`;
+ }).join('');
+ container.innerHTML = traineeHtml;
+ container.querySelectorAll('input').forEach(input => input.addEventListener('change', () => updateTraineeCountForView(view)));
+ document.getElementById(checkAllId).onchange = function() {
+   document.querySelectorAll(`#${containerId} input`).forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
+   updateTraineeCountForView(view);
+ };
+ updateTraineeCountForView(view);
+}
+
+function updateTraineeCountForView(view) {
+ const containerId = view === 'AppV1' ? 'traineeSelectionContainer' : 'traineeSelectionContainerV2';
+ const count = document.querySelectorAll(`#${containerId} input:checked`).length;
+ const countTextId = view === 'AppV1' ? 'traineeCountText' : 'traineeCountTextV2';
+ document.getElementById(countTextId).textContent = `${count} / ${totalTrainees}`;
+}
+
+function populateFieldsForAppV1() {
+ const container = document.getElementById('fieldSelectionContainer');
+ const fieldHtml = availableFields.map(field => {
+   const id = 'field-' + field.value.replace(/\W/g, '_');
+   return `<label for="${id}"><input type="checkbox" name="selectedField" value="${field.value}" id="${id}"><span>${field.label}</span></label>`;
+ }).join('');
+ container.innerHTML = fieldHtml;
+ document.getElementById('checkAllFields').onchange = function() {
+   document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
+   if (this.checked) {
+     areDefaultsSelected = false;
+     document.getElementById('defaultFieldsButton').classList.remove('active');
+   }
+ };
+}
+
+function handleDefaultFieldsToggle() {
+ areDefaultsSelected = !areDefaultsSelected;
+ document.getElementById('defaultFieldsButton').classList.toggle('active', areDefaultsSelected);
+ if (areDefaultsSelected) {
+   document.getElementById('checkAllFields').checked = false;
+ }
+ updateFieldsBasedOnDefaults();
+}
+
+function updateFieldsBasedOnDefaults() {
+ const defaultLabels = appSettings.profileDefaultFieldMappings[selectedProfileForAppV1] ||[];
+ document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => {
+   const field = availableFields.find(f => f.value === cb.value);
+   cb.checked = areDefaultsSelected && field && defaultLabels.includes(field.label);
+ });
+}
+
+function handleGenerate() {
+ const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainer input:checked')).map(cb => cb.value);
+ const fields = Array.from(document.querySelectorAll('#fieldSelectionContainer input:checked')).map(cb => cb.value);
+ if (trainees.length === 0 || fields.length === 0) { showError("Please select at least one trainee and one field."); return; }
+ runGeneration(trainees, fields, 'AppV1');
+}
+
+function handleGenerateV2() {
+ const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainerV2 input:checked')).map(cb => cb.value);
+ if (trainees.length === 0) { showError("Please select at least one trainee."); return; }
+ runGeneration(trainees, defaultFieldHeadersForAppV2Values, 'AppV2');
+}
+
+function runGeneration(trainees, fields, fromView) {
+ previousAppView = fromView;
+ setLoadingState(true, 'Generating Info Card(s)... This may take a moment.');
+ 
+ callBackend('generateCueCardBatch', {
+   selectedTrainees: trainees,
+   selectedFieldHeaders: fields,
+   profile: currentProfile
+ })
+ .then(displayBatchResults)
+ .catch(err => showError(err.message));
+}
+
+function displayBatchResults(results) {
+ const resultDiv = document.getElementById('resultMessage');
+ const successIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+ const errorIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+ const resultsHtml = results.map(item => {
+   const icon = item.status === 'success' ? successIcon : errorIcon;
+   let content;
+   if (item.status === 'success') {
+     content = `<strong>${item.name}:</strong> Card created. <a href="#" class="open-link" data-name="${item.name}">Open Info Card</a>`;
+   } else {
+     content = `<strong>${item.name}:</strong> <span style="color:var(--text-muted-color)">Failed. ${item.message || "Unknown"}</span>`;
+   }
+   return `<div class="result-item ${item.status}"><div class="icon">${icon}</div><div>${content}</div></div>`;
+ }).join('');
+ resultDiv.innerHTML = resultsHtml;
+ resultDiv.querySelectorAll('.open-link').forEach(link => {
+   link.onclick = (e) => {
+     e.preventDefault();
+     const resultData = results.find(r => r.name === e.target.dataset.name);
+     if (resultData && resultData.htmlContent) {
+       const newWindow = window.open('', '_blank');
+       if (newWindow) {
+         newWindow.document.write(resultData.htmlContent);
+         newWindow.document.close();
+       } else {
+         alert('Popup blocked! Please allow popups for this site to view the info card.');
+       }
+     }
+   };
+ });
+ setLoadingState(false);
+ switchView('app-results-view');
+}
+
+function showError(message) {
+ setLoadingState(false);
+ displayBatchResults([{ status: 'error', name: 'System Error', message: message || "An unknown error occurred." }]);
+}
+
+function backToSelections() {
+ switchView('main-app-content');
+ document.getElementById(previousAppView === 'AppV1' ? 'app-v1-content' : 'app-v2-content').style.display = 'flex';
+}
+
+function goToLandingPage() {
+ setLoadingState(true, 'Loading...');
+ window.onload();
+}
+</script>
+</body>
+</html>
