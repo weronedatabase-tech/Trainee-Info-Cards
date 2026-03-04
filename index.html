@@ -25,7 +25,6 @@
  --transition-speed: 0.2s;
 }
 
-/* FIX: Changed base font-size from 24px to standard 16px */
 html { font-size: 16px; }
 
 body {
@@ -48,7 +47,6 @@ body {
  background-color: var(--background-color);
 }
 
-/* FIX: Reduced max and min title clamps */
 .app-title {
  text-align: center;
  color: var(--text-color);
@@ -108,7 +106,6 @@ body {
  gap: 0.75rem;
 }
 
-/* FIX: Normalized Sub-headings */
 .section-title { font-size: 1.25rem; font-weight: 600; flex-grow: 1; margin: 0; }
 .header-checkbox { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary-color); cursor: pointer; }
 
@@ -121,7 +118,6 @@ body {
  padding: 0.5rem;
 }
 
-/* FIX: Scaled down checkbox items and padding */
 .checkbox-list-wrapper label {
  display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
  border-radius: var(--border-radius); cursor: pointer;
@@ -130,7 +126,6 @@ body {
 .checkbox-list-wrapper label:hover { background-color: var(--border-color); color: var(--text-color); }
 .checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary-color); }
 
-/* FIX: Normalized buttons from gigantic 1.8rem + 1.7rem padding down to standard specs */
 .button {
  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
  border: 1px solid transparent; padding: 0.875rem 1.5rem; border-radius: var(--border-radius);
@@ -161,7 +156,6 @@ body {
 .result-item.error { background-color: var(--error-bg-color); border-color: var(--error-color); }
 .result-item .icon svg { width: 24px; height: 24px; }
 
-/* FIX: Standardized input form heights */
 .search-input { width: 100%; padding: 0.75rem; font-size: 1rem; background-color: var(--input-bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); margin-bottom: 0.5rem; }
 .search-input::placeholder { color: var(--text-muted-color); }
 
@@ -352,7 +346,23 @@ async function callBackend(action, payload = {}) {
       },
       body: JSON.stringify({ action, payload })
     });
-    const result = await response.json();
+    
+    // Read the response as raw text first
+    const rawText = await response.text();
+    
+    let result;
+    try {
+      // Try to parse it as JSON
+      result = JSON.parse(rawText);
+    } catch (e) {
+      console.error("Failed to parse JSON. Raw response from Google:", rawText);
+      // If it starts with an HTML tag, tell the user exactly what to fix
+      if (rawText.trim().startsWith('<')) {
+        throw new Error("Received an HTML page instead of JSON. You must go to Google Apps Script, click Deploy > New Deployment, and ensure 'Who has access' is set to 'Anyone'.");
+      }
+      throw new Error("Invalid response format from server.");
+    }
+    
     if (!result.success) {
       throw new Error(result.error);
     }
@@ -414,7 +424,7 @@ window.onload = () => {
    })
    .catch(err => {
      showError(err.message);
-     document.getElementById('loader-message').textContent = `Error loading settings: ${err.message}`;
+     document.getElementById('loader-message').textContent = `Error: ${err.message}`;
    });
 };
 
