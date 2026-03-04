@@ -2,8 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Trainee Info Card Generator</title>
+
+<!-- ========================================== -->
+<!-- ENVIRONMENT CONFIGURATION                  -->
+<!-- ========================================== -->
+<script>
+// Change this variable to 'DEV' or 'PROD' to switch environments
+const ACTIVE_ENV = 'PROD';
+
+const ENV_URLS = {
+  PROD: "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec",
+  DEV: "https://script.google.com/macros/s/AKfycbz5lEH75nTIX2epTYjirnSesn0Lt7HAUrczaEYTL031haBWzNaQSw9FmOowU_5jD1TY/exec"
+};
+
+const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
+</script>
+<!-- ========================================== -->
+
 <style>
 :root {
  --primary-color: #38bdf8;
@@ -25,6 +42,12 @@
  --transition-speed: 0.2s;
 }
 
+/* Custom Scrollbar for better UI */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background-color: var(--text-muted-color); }
+
 html { font-size: 16px; }
 
 body {
@@ -37,18 +60,19 @@ body {
  display: flex;
  flex-direction: column;
  overflow: hidden;
+ -webkit-tap-highlight-color: transparent;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
 .dev-banner {
  display: none; /* Hidden by default, shown via JS if DEV */
- background-color: #ef4444; /* Red color */
+ background-color: #ef4444; 
  color: #ffffff;
  text-align: center;
- padding: 0.25rem;
+ padding: 0.2rem;
  font-weight: bold;
- font-size: 0.875rem;
+ font-size: 0.75rem;
  letter-spacing: 0.1em;
  flex-shrink: 0;
 }
@@ -56,7 +80,7 @@ body {
 .app-header {
  position: relative;
  flex-shrink: 0;
- padding: 1rem;
+ padding: 0.75rem 1rem;
  background-color: var(--background-color);
  display: flex;
  justify-content: center;
@@ -66,10 +90,9 @@ body {
 .app-title {
  text-align: center;
  color: var(--text-color);
- font-size: clamp(1.5rem, 5vw, 2.5rem);
+ font-size: clamp(1.25rem, 5vw, 1.75rem);
  font-weight: 700;
  margin: 0;
- margin-top: 0.5rem;
 }
 
 .dialog-container {
@@ -77,7 +100,7 @@ body {
  width: 100%;
  max-width: 1200px;
  margin: 0 auto;
- padding: 0 1rem;
+ padding: 0 0.75rem 0.75rem 0.75rem;
  display: flex;
  flex-direction: column;
  overflow: hidden;
@@ -86,7 +109,7 @@ body {
 .app-view {
  display: none;
  flex-direction: column;
- gap: 1rem;
+ gap: 0.75rem;
  height: 100%;
  animation: fadeIn 0.3s ease-in-out;
 }
@@ -95,7 +118,7 @@ body {
 .panels-container {
  display: flex;
  flex-direction: column;
- gap: 1rem;
+ gap: 0.75rem;
  flex-grow: 1;
  overflow: hidden;
 }
@@ -104,27 +127,36 @@ body {
  background-color: var(--container-bg-color);
  border: 1px solid var(--border-color);
  border-radius: var(--border-radius);
- padding: 1rem;
+ padding: 0.75rem;
  display: flex;
  flex-direction: column;
- gap: 0.75rem;
+ gap: 0.6rem;
  overflow: hidden;
  flex: 1;
 }
 #landing-page .section { width: 100%; }
 
 .section-header {
- padding-bottom: 0.5rem;
- border-bottom: 1px solid var(--border-color);
  display: flex;
  justify-content: space-between;
  align-items: center;
  flex-shrink: 0;
- gap: 0.75rem;
+ gap: 0.5rem;
 }
 
-.section-title { font-size: 1.25rem; font-weight: 600; flex-grow: 1; margin: 0; }
-.header-checkbox { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary-color); cursor: pointer; }
+.section-title { font-size: 1.1rem; font-weight: 600; flex-grow: 1; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-checkbox { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary-color); cursor: pointer; margin: 0; }
+
+/* Stylish Count Badge */
+.count-display {
+ background-color: var(--input-bg-color);
+ color: var(--text-muted-color);
+ padding: 0.2rem 0.6rem;
+ border-radius: 1rem;
+ font-size: 0.8rem;
+ font-weight: 600;
+ flex-shrink: 0;
+}
 
 .checkbox-list-wrapper {
  overflow-y: auto;
@@ -132,20 +164,36 @@ body {
  background-color: var(--input-bg-color);
  border-radius: var(--border-radius);
  border: 1px solid var(--border-color);
- padding: 0.5rem;
+ padding: 0; /* Removed padding for edge-to-edge list items */
 }
 
+/* Edge-to-edge list items with dividers */
 .checkbox-list-wrapper label {
- display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
- border-radius: var(--border-radius); cursor: pointer;
- transition: background-color var(--transition-speed); font-size: 1rem; color: var(--text-color);
+ display: flex; 
+ align-items: center; 
+ gap: 0.75rem; 
+ padding: 0.875rem 0.75rem;
+ border-bottom: 1px solid var(--border-color);
+ cursor: pointer;
+ transition: background-color var(--transition-speed); 
+ font-size: 0.95rem; 
+ color: var(--text-color);
 }
-.checkbox-list-wrapper label:hover { background-color: var(--border-color); color: var(--text-color); }
-.checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary-color); }
+.checkbox-list-wrapper label:last-child {
+ border-bottom: none;
+}
+.checkbox-list-wrapper label:hover { background-color: rgba(255, 255, 255, 0.05); }
+
+/* Ensure long text wraps nicely without squishing checkbox */
+.checkbox-list-wrapper label span {
+ flex: 1;
+ line-height: 1.3;
+}
+.checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary-color); margin: 0; }
 
 .button {
  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
- border: 1px solid transparent; padding: 0.875rem 1.5rem; border-radius: var(--border-radius);
+ border: 1px solid transparent; padding: 0.75rem 1.25rem; border-radius: var(--border-radius);
  cursor: pointer; font-size: 1rem; font-weight: 600; width: 100%; text-align: center;
  transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
 }
@@ -156,44 +204,60 @@ body {
 .button-secondary:not(:disabled):hover { background-color: var(--border-color); }
 .button-accent { background-color: var(--accent-color); color: var(--background-color); }
 .button-accent:not(:disabled):hover { background-color: var(--accent-hover-color); }
-.button-small { padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; width: auto; }
-.button.active { background-color: var(--primary-color); color: var(--background-color); border-color: var(--primary-color); }
-.button.active:hover { background-color: var(--primary-hover-color); }
-.button-group { display: flex; flex-direction: column; gap: 0.75rem; flex-shrink: 0; padding-top: 0.5rem; }
 
-#loader { align-items: center; justify-content: center; gap: 1rem; color: var(--text-muted-color); font-size: 1.25rem; }
-.spinner { width: 50px; height: 50px; border: 5px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
+/* Compact outlined pill style for Default Fields */
+.button-small { 
+ padding: 0.35rem 0.75rem; 
+ font-size: 0.8rem; 
+ font-weight: 600; 
+ width: auto; 
+ border-radius: 1rem;
+ background-color: transparent;
+ border: 1px solid var(--primary-color);
+ color: var(--primary-color);
+ flex-shrink: 0;
+}
+.button.active { background-color: var(--primary-color); color: var(--background-color); }
+.button.active:hover { background-color: var(--primary-hover-color); border-color: var(--primary-hover-color); }
+
+.button-group { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; }
+
+#loader { align-items: center; justify-content: center; gap: 1rem; color: var(--text-muted-color); font-size: 1.1rem; }
+.spinner { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.result-list { display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; flex-grow: 1; }
-.result-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 1rem; border-radius: var(--border-radius); border: 1px solid; font-size: 1rem; word-break: break-word; flex-shrink: 0; }
+.result-list { display: flex; flex-direction: column; gap: 0.75rem; overflow-y: auto; flex-grow: 1; padding-right: 0.25rem; }
+.result-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.875rem; border-radius: var(--border-radius); border: 1px solid; font-size: 0.95rem; word-break: break-word; flex-shrink: 0; }
 .result-item.success { background-color: var(--success-bg-color); border-color: var(--success-color); }
-.result-item.success a { color: var(--primary-hover-color); text-decoration: none; }
+.result-item.success a { color: var(--primary-hover-color); text-decoration: none; font-weight: 600; }
 .result-item.success a:hover { text-decoration: underline; }
 .result-item.error { background-color: var(--error-bg-color); border-color: var(--error-color); }
-.result-item .icon svg { width: 24px; height: 24px; }
+.result-item .icon svg { width: 20px; height: 20px; flex-shrink: 0; margin-top: 0.1rem; }
 
-.search-input { width: 100%; padding: 0.75rem; font-size: 1rem; background-color: var(--input-bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); margin-bottom: 0.5rem; }
+.search-input { width: 100%; padding: 0.6rem 0.75rem; font-size: 0.95rem; background-color: var(--input-bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); flex-shrink: 0; }
 .search-input::placeholder { color: var(--text-muted-color); }
+.search-input:focus { outline: none; border-color: var(--primary-color); }
 
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: flex-start; justify-content: center; z-index: 1000; padding: 1rem; }
-.modal-content { background-color: var(--container-bg-color); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+.modal-content { background-color: var(--container-bg-color); padding: 1.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color); width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 1rem; margin-top: 4rem; }
 .modal-title { font-size: 1.25rem; font-weight: 600; margin: 0; }
 .modal-input { background-color: var(--input-bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 0.75rem; font-size: 1rem; width: 100%; }
+.modal-input:focus { outline: none; border-color: var(--primary-color); }
 .modal-error { color: var(--error-color); font-size: 0.875rem; text-align: center; min-height: 1.2rem; }
 .modal-buttons { display: flex; gap: 0.75rem; justify-content: flex-end; }
 .modal-buttons .button { width: auto; padding: 0.6rem 1.2rem; font-size: 1rem; }
 
-.password-change-form { display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; overflow-y: auto; padding: 0.5rem; }
-.password-section-label { font-size: 1rem; font-weight: 600; color: var(--text-color); margin-top: 0.75rem; }
-.password-change-form .divider { border: none; height: 1px; background-color: var(--border-color); margin: 1rem 0; }
+.password-change-form { display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; overflow-y: auto; padding: 0.5rem 0; }
+.password-section-label { font-size: 0.95rem; font-weight: 600; color: var(--text-color); margin-top: 0.75rem; }
+.password-change-form .divider { border: none; height: 1px; background-color: var(--border-color); margin: 0.75rem 0; }
 
 @media (min-width: 768px) {
  .panels-container { flex-direction: row; }
  #landing-page .button-group { flex-direction: column; align-items: center; }
  #main-app-content .button-group, #app-results-view .button-group, #settings-page .button-group { flex-direction: row-reverse; justify-content: flex-start; }
- .button { width: auto; }
+ .button { width: auto; padding: 0.75rem 1.5rem; }
  #landing-page .button { width: 100%; max-width: 400px; }
+ .app-title { font-size: 2rem; }
 }
 </style>
 </head>
@@ -237,7 +301,7 @@ body {
              <div class="section-header">
                   <input type="checkbox" id="checkAllFields" class="header-checkbox" title="Select/Deselect All">
                   <h2 class="section-title">Select Fields</h2>
-                  <button id="defaultFieldsButton" class="button button-small button-secondary">Default Fields</button>
+                  <button id="defaultFieldsButton" class="button button-small">Default Fields</button>
              </div>
              <input type="text" id="fieldSearchV1" class="search-input" placeholder="Search fields..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
              <div class="checkbox-list-wrapper">
@@ -335,23 +399,8 @@ body {
 </div>
 
 <script>
-// ==========================================
-// ENVIRONMENT CONFIGURATION
-// ==========================================
-// Change this variable to 'DEV' or 'PROD' to switch environments
-const ACTIVE_ENV = 'PROD';
-
-const ENV_URLS = {
-  PROD: "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec",
-  DEV: "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec"
-};
-
-const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
-
-// ==========================================
-
 // Global state variables
-let availableFields = [], allTrainees =[], appSettings = {};
+let availableFields =[], allTrainees =[], appSettings = {};
 let totalTrainees = 0, previousAppView = '', selectedProfileForAppV1 = 'Regular Volunteer';
 let profileOrSettingsToAuth = '', currentProfile = '';
 let areDefaultsSelected = true;
@@ -654,7 +703,7 @@ function populateTraineesForView(view) {
  const container = document.getElementById(containerId);
  totalTrainees = allTrainees.length;
  if (totalTrainees === 0) {
-   container.innerHTML = '<div style="padding:0.5em;text-align:center;color:var(--text-muted-color);">No active trainees found.</div>';
+   container.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-muted-color);">No active trainees found.</div>';
    return;
  }
  const traineeHtml = allTrainees.map(t => {
@@ -684,106 +733,4 @@ function populateFieldsForAppV1() {
    return `<label for="${id}"><input type="checkbox" name="selectedField" value="${field.value}" id="${id}"><span>${field.label}</span></label>`;
  }).join('');
  container.innerHTML = fieldHtml;
- document.getElementById('checkAllFields').onchange = function() {
-   document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
-   if (this.checked) {
-     areDefaultsSelected = false;
-     document.getElementById('defaultFieldsButton').classList.remove('active');
-   }
- };
-}
-
-function handleDefaultFieldsToggle() {
- areDefaultsSelected = !areDefaultsSelected;
- document.getElementById('defaultFieldsButton').classList.toggle('active', areDefaultsSelected);
- if (areDefaultsSelected) {
-   document.getElementById('checkAllFields').checked = false;
- }
- updateFieldsBasedOnDefaults();
-}
-
-function updateFieldsBasedOnDefaults() {
- const defaultLabels = appSettings.profileDefaultFieldMappings[selectedProfileForAppV1] ||[];
- document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => {
-   const field = availableFields.find(f => f.value === cb.value);
-   cb.checked = areDefaultsSelected && field && defaultLabels.includes(field.label);
- });
-}
-
-function handleGenerate() {
- const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainer input:checked')).map(cb => cb.value);
- const fields = Array.from(document.querySelectorAll('#fieldSelectionContainer input:checked')).map(cb => cb.value);
- if (trainees.length === 0 || fields.length === 0) { showError("Please select at least one trainee and one field."); return; }
- runGeneration(trainees, fields, 'AppV1');
-}
-
-function handleGenerateV2() {
- const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainerV2 input:checked')).map(cb => cb.value);
- if (trainees.length === 0) { showError("Please select at least one trainee."); return; }
- runGeneration(trainees, defaultFieldHeadersForAppV2Values, 'AppV2');
-}
-
-function runGeneration(trainees, fields, fromView) {
- previousAppView = fromView;
- setLoadingState(true, 'Generating Info Card(s)... This may take a moment.');
- 
- callBackend('generateCueCardBatch', {
-   selectedTrainees: trainees,
-   selectedFieldHeaders: fields,
-   profile: currentProfile
- })
- .then(displayBatchResults)
- .catch(err => showError(err.message));
-}
-
-function displayBatchResults(results) {
- const resultDiv = document.getElementById('resultMessage');
- const successIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
- const errorIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
- const resultsHtml = results.map(item => {
-   const icon = item.status === 'success' ? successIcon : errorIcon;
-   let content;
-   if (item.status === 'success') {
-     content = `<strong>${item.name}:</strong> Card created. <a href="#" class="open-link" data-name="${item.name}">Open Info Card</a>`;
-   } else {
-     content = `<strong>${item.name}:</strong> <span style="color:var(--text-muted-color)">Failed. ${item.message || "Unknown"}</span>`;
-   }
-   return `<div class="result-item ${item.status}"><div class="icon">${icon}</div><div>${content}</div></div>`;
- }).join('');
- resultDiv.innerHTML = resultsHtml;
- resultDiv.querySelectorAll('.open-link').forEach(link => {
-   link.onclick = (e) => {
-     e.preventDefault();
-     const resultData = results.find(r => r.name === e.target.dataset.name);
-     if (resultData && resultData.htmlContent) {
-       const newWindow = window.open('', '_blank');
-       if (newWindow) {
-         newWindow.document.write(resultData.htmlContent);
-         newWindow.document.close();
-       } else {
-         alert('Popup blocked! Please allow popups for this site to view the info card.');
-       }
-     }
-   };
- });
- setLoadingState(false);
- switchView('app-results-view');
-}
-
-function showError(message) {
- setLoadingState(false);
- displayBatchResults([{ status: 'error', name: 'System Error', message: message || "An unknown error occurred." }]);
-}
-
-function backToSelections() {
- switchView('main-app-content');
- document.getElementById(previousAppView === 'AppV1' ? 'app-v1-content' : 'app-v2-content').style.display = 'flex';
-}
-
-function goToLandingPage() {
- setLoadingState(true, `Loading ${ACTIVE_ENV} data...`);
- window.onload();
-}
-</script>
-</body>
-</html>
+ doc
