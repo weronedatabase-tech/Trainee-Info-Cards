@@ -41,10 +41,26 @@ body {
 
 *, *::before, *::after { box-sizing: border-box; }
 
+.dev-banner {
+ display: none; /* Hidden by default, shown via JS if DEV */
+ background-color: #ef4444; /* Red color */
+ color: #ffffff;
+ text-align: center;
+ padding: 0.25rem;
+ font-weight: bold;
+ font-size: 0.875rem;
+ letter-spacing: 0.1em;
+ flex-shrink: 0;
+}
+
 .app-header {
+ position: relative;
  flex-shrink: 0;
  padding: 1rem;
  background-color: var(--background-color);
+ display: flex;
+ justify-content: center;
+ align-items: center;
 }
 
 .app-title {
@@ -53,6 +69,7 @@ body {
  font-size: clamp(1.5rem, 5vw, 2.5rem);
  font-weight: 700;
  margin: 0;
+ margin-top: 0.5rem;
 }
 
 .dialog-container {
@@ -181,6 +198,9 @@ body {
 </style>
 </head>
 <body>
+<!-- Dev Mode Banner -->
+<div id="dev-banner" class="dev-banner">DEV MODE</div>
+
 <header class="app-header">
 <h1 class="app-title">Trainee Info Card Generator</h1>
 </header>
@@ -316,11 +336,17 @@ body {
 
 <script>
 // ==========================================
-// CONFIGURATION
+// ENVIRONMENT CONFIGURATION
 // ==========================================
-// 1. Deploy the Apps Script as a Web App (Execute as: "Me", Access: "Anyone").
-// 2. Paste the Web App URL below:
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec"; 
+// Change this variable to 'DEV' or 'PROD' to switch environments
+const ACTIVE_ENV = 'PROD';
+
+const ENV_URLS = {
+  PROD: "https://script.google.com/macros/s/AKfycbyEop3q0sfBjN4PXt3FoRJL2byI9wpez-Bp0N4PQ8kGJjb3AJqhZoSxyjcmKWlgfZkZIw/exec",
+  DEV: "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec"
+};
+
+const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
 // ==========================================
 
@@ -358,7 +384,7 @@ async function callBackend(action, payload = {}) {
       console.error("Failed to parse JSON. Raw response from Google:", rawText);
       // If it starts with an HTML tag, tell the user exactly what to fix
       if (rawText.trim().startsWith('<')) {
-        throw new Error("Received an HTML page instead of JSON. You must go to Google Apps Script, click Deploy > New Deployment, and ensure 'Who has access' is set to 'Anyone'.");
+        throw new Error(`Received an HTML page from ${ACTIVE_ENV}. Make sure the ${ACTIVE_ENV} Google Apps Script Web App 'Who has access' is set to 'Anyone'.`);
       }
       throw new Error("Invalid response format from server.");
     }
@@ -413,7 +439,12 @@ function filterList(inputId, containerId) {
 * Main entry point on window load. 
 */
 window.onload = () => {
- setLoadingState(true, 'Loading data...');
+ // Show DEV banner if environment is DEV
+ if (ACTIVE_ENV === 'DEV') {
+   document.getElementById('dev-banner').style.display = 'block';
+ }
+ 
+ setLoadingState(true, `Loading ${ACTIVE_ENV} data...`);
  callBackend('getInitialData')
    .then(data => {
      appSettings = data.appSettings;
@@ -521,9 +552,9 @@ function populateSettingsForm() {
  const regularContainer = document.getElementById('settings-regular-fields');
  const adhocContainer = document.getElementById('settings-adhoc-fields');
  const allAvailableFields =[...new Set(availableFields.map(f => f.label))].sort();
- const regularDefaults = appSettings.profileDefaultFieldMappings['Regular Volunteer'] || [];
- const adhocDefaults = appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] || [];
- let regularHtml = [];
+ const regularDefaults = appSettings.profileDefaultFieldMappings['Regular Volunteer'] ||[];
+ const adhocDefaults = appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] ||[];
+ let regularHtml =[];
  let adhocHtml =[];
  allAvailableFields.forEach(fieldLabel => {
    const regularId = `setting-reg-${fieldLabel.replace(/\W/g, '_')}`;
@@ -750,7 +781,7 @@ function backToSelections() {
 }
 
 function goToLandingPage() {
- setLoadingState(true, 'Loading...');
+ setLoadingState(true, `Loading ${ACTIVE_ENV} data...`);
  window.onload();
 }
 </script>
