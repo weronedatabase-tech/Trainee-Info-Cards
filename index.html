@@ -733,4 +733,106 @@ function populateFieldsForAppV1() {
    return `<label for="${id}"><input type="checkbox" name="selectedField" value="${field.value}" id="${id}"><span>${field.label}</span></label>`;
  }).join('');
  container.innerHTML = fieldHtml;
- doc
+ document.getElementById('checkAllFields').onchange = function() {
+   document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
+   if (this.checked) {
+     areDefaultsSelected = false;
+     document.getElementById('defaultFieldsButton').classList.remove('active');
+   }
+ };
+}
+
+function handleDefaultFieldsToggle() {
+ areDefaultsSelected = !areDefaultsSelected;
+ document.getElementById('defaultFieldsButton').classList.toggle('active', areDefaultsSelected);
+ if (areDefaultsSelected) {
+   document.getElementById('checkAllFields').checked = false;
+ }
+ updateFieldsBasedOnDefaults();
+}
+
+function updateFieldsBasedOnDefaults() {
+ const defaultLabels = appSettings.profileDefaultFieldMappings[selectedProfileForAppV1] ||[];
+ document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => {
+   const field = availableFields.find(f => f.value === cb.value);
+   cb.checked = areDefaultsSelected && field && defaultLabels.includes(field.label);
+ });
+}
+
+function handleGenerate() {
+ const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainer input:checked')).map(cb => cb.value);
+ const fields = Array.from(document.querySelectorAll('#fieldSelectionContainer input:checked')).map(cb => cb.value);
+ if (trainees.length === 0 || fields.length === 0) { showError("Please select at least one trainee and one field."); return; }
+ runGeneration(trainees, fields, 'AppV1');
+}
+
+function handleGenerateV2() {
+ const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainerV2 input:checked')).map(cb => cb.value);
+ if (trainees.length === 0) { showError("Please select at least one trainee."); return; }
+ runGeneration(trainees, defaultFieldHeadersForAppV2Values, 'AppV2');
+}
+
+function runGeneration(trainees, fields, fromView) {
+ previousAppView = fromView;
+ setLoadingState(true, 'Generating Info Card(s)... This may take a moment.');
+ 
+ callBackend('generateCueCardBatch', {
+   selectedTrainees: trainees,
+   selectedFieldHeaders: fields,
+   profile: currentProfile
+ })
+ .then(displayBatchResults)
+ .catch(err => showError(err.message));
+}
+
+function displayBatchResults(results) {
+ const resultDiv = document.getElementById('resultMessage');
+ const successIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+ const errorIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+ const resultsHtml = results.map(item => {
+   const icon = item.status === 'success' ? successIcon : errorIcon;
+   let content;
+   if (item.status === 'success') {
+     content = `<strong>${item.name}:</strong> Card created. <a href="#" class="open-link" data-name="${item.name}">Open Info Card</a>`;
+   } else {
+     content = `<strong>${item.name}:</strong> <span style="color:var(--text-muted-color)">Failed. ${item.message || "Unknown"}</span>`;
+   }
+   return `<div class="result-item ${item.status}"><div class="icon">${icon}</div><div>${content}</div></div>`;
+ }).join('');
+ resultDiv.innerHTML = resultsHtml;
+ resultDiv.querySelectorAll('.open-link').forEach(link => {
+   link.onclick = (e) => {
+     e.preventDefault();
+     const resultData = results.find(r => r.name === e.target.dataset.name);
+     if (resultData && resultData.htmlContent) {
+       const newWindow = window.open('', '_blank');
+       if (newWindow) {
+         newWindow.document.write(resultData.htmlContent);
+         newWindow.document.close();
+       } else {
+         alert('Popup blocked! Please allow popups for this site to view the info card.');
+       }
+     }
+   };
+ });
+ setLoadingState(false);
+ switchView('app-results-view');
+}
+
+function showError(message) {
+ setLoadingState(false);
+ displayBatchResults([{ status: 'error', name: 'System Error', message: message || "An unknown error occurred." }]);
+}
+
+function backToSelections() {
+ switchView('main-app-content');
+ document.getElementById(previousAppView === 'AppV1' ? 'app-v1-content' : 'app-v2-content').style.display = 'flex';
+}
+
+function goToLandingPage() {
+ setLoadingState(true, `Loading ${ACTIVE_ENV} data...`);
+ window.onload();
+}
+</script>
+</body>
+</html>
