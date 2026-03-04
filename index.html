@@ -134,6 +134,7 @@ body {
  overflow: hidden;
  flex: 1;
 }
+#landing-page { width: 100%; justify-content: center; align-items: center; }
 #landing-page .section { width: 100%; }
 
 .section-header {
@@ -164,10 +165,9 @@ body {
  background-color: var(--input-bg-color);
  border-radius: var(--border-radius);
  border: 1px solid var(--border-color);
- padding: 0; /* Removed padding for edge-to-edge list items */
+ padding: 0;
 }
 
-/* Edge-to-edge list items with dividers */
 .checkbox-list-wrapper label {
  display: flex; 
  align-items: center; 
@@ -178,13 +178,13 @@ body {
  transition: background-color var(--transition-speed); 
  font-size: 0.95rem; 
  color: var(--text-color);
+ touch-action: manipulation;
 }
 .checkbox-list-wrapper label:last-child {
  border-bottom: none;
 }
 .checkbox-list-wrapper label:hover { background-color: rgba(255, 255, 255, 0.05); }
 
-/* Ensure long text wraps nicely without squishing checkbox */
 .checkbox-list-wrapper label span {
  flex: 1;
  line-height: 1.3;
@@ -196,6 +196,11 @@ body {
  border: 1px solid transparent; padding: 0.75rem 1.25rem; border-radius: var(--border-radius);
  cursor: pointer; font-size: 1rem; font-weight: 600; width: 100%; text-align: center;
  transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+ position: relative;
+ z-index: 10;
+ -webkit-appearance: none;
+ appearance: none;
+ touch-action: manipulation;
 }
 .button:disabled { opacity: 0.5; cursor: not-allowed; }
 .button-primary { background-color: var(--primary-color); color: var(--background-color); }
@@ -205,7 +210,6 @@ body {
 .button-accent { background-color: var(--accent-color); color: var(--background-color); }
 .button-accent:not(:disabled):hover { background-color: var(--accent-hover-color); }
 
-/* Compact outlined pill style for Default Fields */
 .button-small { 
  padding: 0.35rem 0.75rem; 
  font-size: 0.8rem; 
@@ -269,20 +273,24 @@ body {
 <h1 class="app-title">Trainee Info Card Generator</h1>
 </header>
 <div class="dialog-container">
-<div id="loader" class="app-view">
+
+<!-- Setting loader to be visible natively on load to prevent UI interaction before data arrives -->
+<div id="loader" class="app-view" style="display: flex;">
  <div class="spinner"></div>
  <span id="loader-message">Loading data...</span>
 </div>
-<div id="landing-page" class="app-view" style="display: flex; justify-content: center; align-items: center;">
+
+<div id="landing-page" class="app-view">
   <div class="section">
      <div class="section-header"><h2 class="section-title">Select Volunteer Profile</h2></div>
      <div class="button-group">
-         <button class="button button-primary" onclick="promptForPassword('Regular Volunteer')">Regular Volunteer</button>
-         <button class="button button-primary" onclick="promptForPassword('Adhoc Volunteer')">Adhoc Volunteer / Exposure Session</button>
-         <button id="settingsButton" class="button button-secondary" onclick="promptForPassword('Settings')" style="margin-top: 1rem;">Settings</button>
+         <button type="button" class="button button-primary" onclick="promptForPassword('Regular Volunteer')">Regular Volunteer</button>
+         <button type="button" class="button button-primary" onclick="promptForPassword('Adhoc Volunteer')">Adhoc Volunteer / Exposure Session</button>
+         <button type="button" id="settingsButton" class="button button-secondary" onclick="promptForPassword('Settings')" style="margin-top: 1rem;">Settings</button>
      </div>
  </div>
 </div>
+
 <main id="main-app-content" class="app-view">
  <div id="app-v1-content" class="app-view">
       <div class="panels-container">
@@ -301,7 +309,7 @@ body {
              <div class="section-header">
                   <input type="checkbox" id="checkAllFields" class="header-checkbox" title="Select/Deselect All">
                   <h2 class="section-title">Select Fields</h2>
-                  <button id="defaultFieldsButton" class="button button-small">Default Fields</button>
+                  <button type="button" id="defaultFieldsButton" class="button button-small">Default Fields</button>
              </div>
              <input type="text" id="fieldSearchV1" class="search-input" placeholder="Search fields..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
              <div class="checkbox-list-wrapper">
@@ -310,8 +318,8 @@ body {
           </div>
       </div>
       <div class="button-group">
-         <button id="generateButton" class="button button-primary" onclick="handleGenerate()">Generate Card(s)</button>
-         <button id="backToProfilesButtonV1" class="button button-secondary" onclick="goToLandingPage()">Back</button>
+         <button type="button" id="generateButton" class="button button-primary" onclick="handleGenerate()">Generate Card(s)</button>
+         <button type="button" id="backToProfilesButtonV1" class="button button-secondary" onclick="goToLandingPage()">Back</button>
      </div>
  </div>
  <div id="app-v2-content" class="app-view">
@@ -327,8 +335,8 @@ body {
          </div>
       </div>
       <div class="button-group">
-         <button id="generateButtonV2" class="button button-primary" onclick="handleGenerateV2()">Generate Card(s)</button>
-         <button id="backToProfilesButtonV2" class="button button-secondary" onclick="goToLandingPage()">Back</button>
+         <button type="button" id="generateButtonV2" class="button button-primary" onclick="handleGenerateV2()">Generate Card(s)</button>
+         <button type="button" id="backToProfilesButtonV2" class="button button-secondary" onclick="goToLandingPage()">Back</button>
      </div>
  </div>
 </main>
@@ -338,8 +346,8 @@ body {
      <div id="resultMessage" class="result-list"></div>
   </div>
   <div class="button-group">
-     <button id="backToSelectionsButton" class="button button-primary" onclick="backToSelections()">Back to Selections</button>
-     <button id="backToProfilesButtonResults" class="button button-secondary" onclick="goToLandingPage()">Back to Profiles</button>
+     <button type="button" id="backToSelectionsButton" class="button button-primary" onclick="backToSelections()">Back to Selections</button>
+     <button type="button" id="backToProfilesButtonResults" class="button button-secondary" onclick="goToLandingPage()">Back to Profiles</button>
  </div>
 </div>
 <div id="settings-page" class="app-view">
@@ -380,20 +388,21 @@ body {
      </div>
  </div>
  <div class="button-group">
-     <button class="button button-primary" onclick="handleUpdatePasswords()">Update Passwords</button>
-     <button class="button button-accent" onclick="handleSaveSettings()">Save Field Settings</button>
-     <button class="button button-secondary" onclick="goToLandingPage()">Back</button>
+     <button type="button" class="button button-primary" onclick="handleUpdatePasswords()">Update Passwords</button>
+     <button type="button" class="button button-accent" onclick="handleSaveSettings()">Save Field Settings</button>
+     <button type="button" class="button button-secondary" onclick="goToLandingPage()">Back</button>
  </div>
 </div>
 </div>
+
 <div id="password-modal" class="modal-overlay">
 <div class="modal-content">
  <h3 id="password-modal-title" class="modal-title">Enter Password</h3>
  <p id="password-modal-error" class="modal-error"></p>
  <input id="password-input" type="password" class="modal-input" placeholder="Password..." onkeydown="if(event.key === 'Enter') handlePasswordSubmit();">
  <div class="modal-buttons">
-     <button class="button button-secondary" onclick="closePasswordModal()">Cancel</button>
-     <button class="button button-primary" onclick="handlePasswordSubmit()">Submit</button>
+     <button type="button" class="button button-secondary" onclick="closePasswordModal()">Cancel</button>
+     <button type="button" class="button button-primary" onclick="handlePasswordSubmit()">Submit</button>
  </div>
 </div>
 </div>
@@ -410,7 +419,6 @@ let defaultFieldHeadersForAppV2Values =[];
 
 /**
  * Utility function to handle requests to the GAS backend.
- * Uses `text/plain` to seamlessly bypass CORS pre-flight checks while sending a JSON payload.
  */
 async function callBackend(action, payload = {}) {
   try {
@@ -422,16 +430,13 @@ async function callBackend(action, payload = {}) {
       body: JSON.stringify({ action, payload })
     });
     
-    // Read the response as raw text first
     const rawText = await response.text();
     
     let result;
     try {
-      // Try to parse it as JSON
       result = JSON.parse(rawText);
     } catch (e) {
       console.error("Failed to parse JSON. Raw response from Google:", rawText);
-      // If it starts with an HTML tag, tell the user exactly what to fix
       if (rawText.trim().startsWith('<')) {
         throw new Error(`Received an HTML page from ${ACTIVE_ENV}. Make sure the ${ACTIVE_ENV} Google Apps Script Web App 'Who has access' is set to 'Anyone'.`);
       }
@@ -485,9 +490,9 @@ function filterList(inputId, containerId) {
 }
 
 /**
-* Main entry point on window load. 
+* Main entry point utilizing DOMContentLoaded for immediate firing
 */
-window.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
  // Show DEV banner if environment is DEV
  if (ACTIVE_ENV === 'DEV') {
    document.getElementById('dev-banner').style.display = 'block';
@@ -506,7 +511,7 @@ window.onload = () => {
      showError(err.message);
      document.getElementById('loader-message').textContent = `Error: ${err.message}`;
    });
-};
+});
 
 function switchView(viewId) {
  document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
@@ -532,7 +537,11 @@ function promptForPassword(target) {
  error.textContent = '';
  input.value = '';
  modal.style.display = 'flex';
- input.focus();
+ 
+ // Slight delay to ensure focus works safely on mobile rendering
+ setTimeout(() => {
+     try { input.focus(); } catch(e) {}
+ }, 50);
 }
 
 function closePasswordModal() {
@@ -831,7 +840,8 @@ function backToSelections() {
 
 function goToLandingPage() {
  setLoadingState(true, `Loading ${ACTIVE_ENV} data...`);
- window.onload();
+ // Refresh mechanism
+ location.reload();
 }
 </script>
 </body>
