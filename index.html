@@ -13,7 +13,7 @@
 const ACTIVE_ENV = 'PROD';
 
 const ENV_URLS = {
-  PROD: "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec",
+  PROD: "https://script.google.com/macros/s/AKfycbyEop3q0sfBjN4PXt3FoRJL2byI9wpez-Bp0N4PQ8kGJjb3AJqhZoSxyjcmKWlgfZkZIw/exec",
   DEV: "https://script.google.com/macros/s/AKfycbz5lEH75nTIX2epTYjirnSesn0Lt7HAUrczaEYTL031haBWzNaQSw9FmOowU_5jD1TY/exec"
 };
 
@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
    document.getElementById('dev-banner').style.display = 'block';
  }
  
- setLoadingState(true, `Loading ${ACTIVE_ENV} data...`);
+ setLoadingState(true, 'Loading...');
  callBackend('getInitialData')
    .then(data => {
      appSettings = data.appSettings;
@@ -839,7 +839,7 @@ function backToSelections() {
 }
 
 function goToLandingPage() {
- setLoadingState(true, `Loading ${ACTIVE_ENV} data...`);
+ setLoadingState(true, 'Loading...');
  // Refresh mechanism
  location.reload();
 }
