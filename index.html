@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Trainee Info Card Generator</title>
+<title>Trainee Info Cards</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -11,24 +11,20 @@
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 <!-- Phosphor Icons -->
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
-<!-- Google Fonts (Inter) -->
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- ========================================== -->
-<!-- ENVIRONMENT CONFIGURATION                  -->
-<!-- ========================================== -->
 <script>
-// Change this variable to 'DEV' or 'PROD' to switch environments
+// ==========================================
+// ENVIRONMENT CONFIGURATION
+// ==========================================
 const ACTIVE_ENV = 'PROD';
-
 const ENV_URLS = {
   PROD: "https://script.google.com/macros/s/AKfycbyEop3q0sfBjN4PXt3FoRJL2byI9wpez-Bp0N4PQ8kGJjb3AJqhZoSxyjcmKWlgfZkZIw/exec",
   DEV: "https://script.google.com/macros/s/AKfycbz5lEH75nTIX2epTYjirnSesn0Lt7HAUrczaEYTL031haBWzNaQSw9FmOowU_5jD1TY/exec"
 };
-
 const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 </script>
-<!-- ========================================== -->
 
 <style>
   :root { 
@@ -39,13 +35,6 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
     --glass-strong-bg: #ffffff; 
     --input-bg: #ffffff; 
     --input-border: #d1d5db; 
-    --input-text: #111827; 
-    --primary: #3b82f6; 
-    --primary-hover: #2563eb;
-    --success-bg: rgba(16, 185, 129, 0.1);
-    --success-border: #10b981;
-    --error-bg: rgba(239, 68, 68, 0.1);
-    --error-border: #ef4444;
   }
   .dark { 
     --bg-color: #0f172a; 
@@ -55,1013 +44,464 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
     --glass-strong-bg: rgba(15, 23, 42, 0.95); 
     --input-bg: #1e293b; 
     --input-border: #334155; 
-    --input-text: #ffffff; 
-    --primary: #3b82f6; 
-    --primary-hover: #60a5fa;
-    --success-bg: rgba(16, 185, 129, 0.15);
-    --error-bg: rgba(239, 68, 68, 0.15);
   }
 
-  /* Custom Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background-color: var(--input-border); border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background-color: var(--primary); }
-
-  html { font-size: 16px; }
-
-  body { 
-    font-family: 'Inter', sans-serif; 
-    background-color: var(--bg-color); 
-    color: var(--text-color); 
-    -webkit-tap-highlight-color: transparent; 
-    transition: background-color 0.3s, color 0.3s;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
+  
   .glass { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); }
   .glass-strong { background: var(--glass-strong-bg); }
   
   .fade-in { animation: fadeIn 0.3s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .input-field { 
-    background: var(--input-bg); 
-    color: var(--input-text); 
-    border: 1px solid var(--input-border); 
-    font-size: 0.95rem; 
-    border-radius: 0.5rem; 
-    outline: none; 
-    transition: all 0.2s; 
-    padding: 0.75rem; 
-  }
-  .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
+  .input-field { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-size: 0.95rem; border-radius: 0.5rem; outline: none; transition: all 0.2s; padding: 0.75rem; width: 100%; }
+  .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
 
-  /* STRICT SEARCH BOX OVERRIDE TO PREVENT ICON OVERLAP */
-  .search-box {
-    padding-left: 2.5rem !important; 
-    padding-top: 0.65rem !important;
-    padding-bottom: 0.65rem !important;
-  }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; cursor: pointer; }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; font-size: 1.05rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: transform 0.1s, box-shadow 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; cursor: pointer; }
-  .btn-primary:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
-  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-  .btn-secondary { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; font-size: 1.05rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; }
-  .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-secondary { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; }
+  .btn-secondary:hover { border-color: #3b82f6; color: #3b82f6; }
   .btn-secondary:active { transform: scale(0.98); }
-  .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  /* Compact Default Button */
-  .btn-small-pill { padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 700; border-radius: 9999px; background-color: transparent; border: 1px solid var(--primary); color: var(--primary); cursor: pointer; transition: all 0.2s; }
-  .btn-small-pill.active { background-color: var(--primary); color: white; }
-  .btn-small-pill:hover:not(.active) { background-color: rgba(59, 130, 246, 0.1); }
-  @media (min-width: 768px) { .btn-small-pill { padding: 0.35rem 0.85rem; font-size: 0.8rem; } }
+  /* Section Styling */
+  .section-basic { border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
+  .section-medical { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); }
+  .section-abilities { border-left: 4px solid #a855f7; background: rgba(168, 85, 247, 0.05); }
+  .section-engagement { border-left: 4px solid #eab308; background: rgba(234, 179, 8, 0.05); }
+  .section-employment { border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.05); }
 
-  /* App Structure Layout */
-  .app-view { display: none; flex-direction: column; gap: 0.75rem; height: 100%; flex-grow: 1; overflow: hidden; animation: fadeIn 0.3s ease-in-out; }
-  .dialog-container { flex-grow: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 0.5rem 0.5rem 0.5rem; display: flex; flex-direction: column; overflow: hidden; }
-  @media (min-width: 768px) { .dialog-container { padding: 0 0.75rem 0.75rem 0.75rem; } }
+  details > summary { list-style: none; cursor: pointer; outline: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary .chevron { transition: transform 0.3s; }
+  details[open] > summary .chevron { transform: rotate(180deg); }
+  details[open] > div { animation: slideDown 0.3s ease-out; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* -------------------------------------------
-     LAYOUT: SIDE-BY-SIDE PANELS (App V1)
-  ------------------------------------------- */
-  .side-by-side-panels {
-    display: flex;
-    flex-direction: row;
-    gap: 0.35rem; /* Tight gap for mobile */
-    flex-grow: 1;
-    overflow: hidden;
-  }
-  @media (min-width: 768px) { .side-by-side-panels { gap: 1rem; } }
-
-  /* -------------------------------------------
-     LAYOUT: STACKED PANELS (Settings)
-  ------------------------------------------- */
-  .stacked-panels {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    flex-grow: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-bottom: 0.5rem;
-    -webkit-overflow-scrolling: touch;
-  }
-  .stacked-panels .section-panel { min-height: 400px; }
-  @media (min-width: 768px) {
-    .stacked-panels { flex-direction: row; overflow: hidden; }
-    .stacked-panels .section-panel { min-height: 0; height: 100%; }
-  }
-
-  /* Universal Section Panel */
-  .section-panel { 
-    background-color: var(--glass-bg); 
-    backdrop-filter: blur(12px); 
-    -webkit-backdrop-filter: blur(12px); 
-    border: 1px solid var(--glass-border); 
-    border-radius: 0.75rem; 
-    padding: 0.5rem; 
-    display: flex; 
-    flex-direction: column; 
-    flex: 1; 
-    min-width: 0; /* CRITICAL to prevent flex overflow on side-by-side */
-    overflow: hidden; 
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
-  }
-  @media (min-width: 768px) { .section-panel { padding: 0.75rem; } }
-
-  /* Dynamic Checkbox Lists */
-  .checkbox-list-wrapper { overflow-y: auto; flex-grow: 1; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); padding: 0; }
-  .checkbox-list-wrapper label { 
-    display: flex; 
-    align-items: center; 
-    gap: 0.4rem; 
-    padding: 0.65rem 0.5rem; 
-    border-bottom: 1px solid var(--glass-border); 
-    cursor: pointer; 
-    transition: background-color 0.2s; 
-    font-size: 0.8rem; 
-    color: var(--text-color); 
-    touch-action: manipulation; 
-  }
-  .checkbox-list-wrapper label:last-child { border-bottom: none; }
-  .checkbox-list-wrapper label:hover { background-color: rgba(128, 128, 128, 0.05); }
-  .checkbox-list-wrapper input[type="checkbox"] { width: 1.1rem; height: 1.1rem; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
-  .checkbox-list-wrapper label span { flex: 1; line-height: 1.3; }
-
-  @media (min-width: 768px) {
-    .checkbox-list-wrapper label { font-size: 0.95rem; padding: 0.85rem 1rem; gap: 0.75rem; }
-    .checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
-  }
-
-  /* Generic Header Checkbox */
-  .header-checkbox { width: 1.15rem; height: 1.15rem; accent-color: var(--primary); cursor: pointer; margin: 0; }
-  @media (min-width: 768px) { .header-checkbox { width: 1.35rem; height: 1.35rem; } }
-
-  /* Results Styling */
-  .result-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 1rem; border-radius: 0.5rem; border: 1px solid; font-size: 0.95rem; word-break: break-word; flex-shrink: 0; }
-  .result-item.success { background-color: var(--success-bg); border-color: var(--success-border); color: var(--text-color); }
-  .result-item.success a { color: var(--primary); text-decoration: underline; font-weight: 600; }
-  .result-item.error { background-color: var(--error-bg); border-color: var(--error-border); color: var(--text-color); }
-
-  /* Modal Setup */
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-
+  .checkbox-list-wrapper { max-height: 200px; overflow-y: auto; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); }
+  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.4rem; padding: 0.65rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; font-size: 0.8rem; color: var(--text-color); }
+  .checkbox-list-wrapper input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: #3b82f6; cursor: pointer; }
+  
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; z-index: 1000; }
 </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-<!-- Dev Mode Banner -->
-<div id="dev-banner" class="w-full bg-red-600 text-white text-center text-xs font-bold py-1 hidden z-[1000] tracking-widest uppercase">DEV MODE</div>
-
-<!-- Toast Notification -->
-<div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl hidden flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300">
+<!-- Dev Mode & Toasts -->
+<div id="dev-banner" class="w-full bg-red-600 text-white text-center text-xs font-bold py-1 hidden tracking-widest uppercase" style="z-index: 1000;">DEV MODE</div>
+<div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 glass px-5 py-3 rounded-full shadow-2xl hidden flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300" style="z-index: 9999;">
   <span id="toast-msg">Notification</span>
 </div>
 
-<!-- Header -->
-<header class="glass sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm mb-4">
-  <div class="flex items-center gap-3">
-    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
-      <i class="ph-bold ph-identification-card text-white text-xl"></i>
+<!-- GLOBAL HEADER -->
+<header class="glass sticky top-0 z-40 px-3 py-2 flex flex-col shadow-sm gap-2">
+  <div class="flex justify-between items-center w-full">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md"><i class="ph-bold ph-users text-white text-lg"></i></div>
+      <div class="flex flex-col"><span class="font-bold text-sm leading-none">Trainee Info</span><span class="text-xs opacity-60 uppercase tracking-widest mt-0.5">Mobile Portal</span></div>
     </div>
-    <div class="flex flex-col">
-      <span class="font-bold text-[1.1rem] leading-tight">Trainee Info Cards</span>
-      <span class="text-[0.65rem] opacity-60 uppercase tracking-widest leading-none">Generator Portal</span>
+    <div class="flex items-center gap-2">
+       <button onclick="openAdminSettingsAuth()" class="p-1.5 rounded-full bg-gray-500 bg-opacity-10 hover:bg-opacity-20 text-gray-600 dark:text-gray-300 transition outline-none focus:outline-none" title="Admin Settings">
+         <i class="ph-fill ph-gear text-lg"></i>
+       </button>
+       <button onclick="toggleTheme()" class="p-1.5 rounded-full bg-gray-500 bg-opacity-10 hover:bg-opacity-20 text-sm transition outline-none focus:outline-none" title="Toggle Theme">🌗</button>
+       <button id="btn-logout" onclick="logout()" class="hidden p-1.5 bg-red-500 bg-opacity-10 text-red-500 rounded-lg hover:bg-opacity-20 transition outline-none focus:outline-none" title="Logout">
+         <i class="ph-bold ph-sign-out text-xl"></i>
+       </button>
     </div>
   </div>
-  <div class="flex items-center gap-1">
-    <button onclick="promptForPassword('Settings')" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Admin Settings">
-      <i class="ph-bold ph-gear"></i>
-    </button>
-    <button onclick="toggleTheme()" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Toggle Theme">
-      🌗
-    </button>
-  </div>
+  <!-- Hidden by default until login -->
+  <div id="user-badge" class="hidden self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-gray-500 bg-opacity-20 text-gray-500 border border-gray-500 border-opacity-30">Guest</div>
 </header>
 
-<div class="dialog-container">
-
-  <!-- Loader View -->
-  <div id="loader" class="app-view" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-    <div class="spinner animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
-    <span id="loader-message" class="opacity-70 font-medium animate-pulse text-lg text-center px-4">Initializing...</span>
-    <button id="loader-retry-btn" class="btn-secondary mt-6 hidden w-auto" onclick="location.reload()">
-      <i class="ph-bold ph-arrows-clockwise"></i> Retry Connection
-    </button>
-  </div>
-
-  <!-- Landing / Login View -->
-  <div id="landing-page" class="app-view items-center justify-center pb-20">
-    <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center relative">
-      <div class="mb-4 flex justify-center">
-        <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
-           <i class="ph-bold ph-lock-key text-white text-3xl"></i>
+<!-- MAIN LOGIN VIEW -->
+<div id="landing-page" class="flex-grow flex flex-col justify-center items-center p-4 fade-in relative">
+  <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center relative">
+    <div class="mb-4 flex justify-center">
+      <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
+         <i class="ph-bold ph-identification-card text-white text-3xl"></i>
+      </div>
+    </div>
+    <h2 class="text-2xl font-bold mb-1 leading-tight">Access Portal</h2>
+    <p class="opacity-70 mb-6 text-sm">Enter your access code to continue.</p>
+    
+    <form onsubmit="event.preventDefault(); handleGeneralLogin();">
+      <div class="mb-4 relative">
+        <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
+        <div class="relative text-left">
+          <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
+          <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500 outline-none focus:outline-none"><i class="ph-bold ph-eye-slash text-xl"></i></button>
         </div>
       </div>
-      <h2 class="text-2xl font-bold mb-2">Access Portal</h2>
-      <p class="opacity-70 mb-6 text-sm">Enter your access code to continue.</p>
-      
-      <!-- Generic Password Form -->
-      <form onsubmit="event.preventDefault(); handleGeneralLogin();">
-        <div class="mb-4 relative">
-          <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
-          <div class="relative text-left">
-            <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3 w-full" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
-            <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i id="general-password-icon" class="ph-bold ph-eye-slash text-xl"></i></button>
-          </div>
-        </div>
-        <button type="submit" id="general-login-btn" class="btn-primary py-3 w-full">
-          <i class="ph-bold ph-sign-in text-xl"></i> Login
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Main App View -->
-  <main id="main-app-content" class="app-view">
-    
-    <!-- App V1 Content (Regular - SIDE-BY-SIDE Layout) -->
-    <div id="app-v1-content" class="app-view">
-      <div class="side-by-side-panels">
-          
-          <!-- Trainee Panel -->
-          <div class="section-panel">
-             <div class="flex flex-row items-center justify-between w-full border-b pb-2 mb-1 gap-1" style="border-color: var(--glass-border);">
-                 <div class="flex flex-row items-center gap-1 overflow-hidden shrink min-w-0">
-                   <input type="checkbox" id="checkAllTrainees" class="header-checkbox shrink-0" title="Select/Deselect All">
-                   <h2 class="font-bold text-sm md:text-lg truncate">Trainees</h2>
-                 </div>
-                 <span id="traineeCountText" class="shrink-0 text-[0.65rem] md:text-xs font-bold px-1.5 py-0.5 rounded-full bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap">0 / 0</span>
-             </div>
-             
-             <div class="relative w-full mt-1 mb-1.5">
-               <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-               <input type="text" id="traineeSearchV1" class="input-field search-box w-full text-sm md:text-base" placeholder="Search..." onkeyup="filterList('traineeSearchV1', 'traineeSelectionContainer')">
-             </div>
-             <div class="checkbox-list-wrapper shadow-inner mt-1">
-                 <div id="traineeSelectionContainer" class="flex flex-col"></div>
-             </div>
-          </div>
-
-          <!-- Fields Panel -->
-          <div class="section-panel" id="field-selection-section">
-             <div class="flex flex-row items-center justify-between w-full border-b pb-2 mb-1 gap-1" style="border-color: var(--glass-border);">
-                 <div class="flex flex-row items-center gap-1 overflow-hidden shrink min-w-0">
-                  <input type="checkbox" id="checkAllFields" class="header-checkbox shrink-0" title="Select/Deselect All">
-                  <h2 class="font-bold text-sm md:text-lg truncate">Fields</h2>
-                 </div>
-                 <button type="button" id="defaultFieldsButton" class="btn-small-pill shrink-0 whitespace-nowrap">Default</button>
-             </div>
-             
-             <div class="relative w-full mt-1 mb-1.5">
-               <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-               <input type="text" id="fieldSearchV1" class="input-field search-box w-full text-sm md:text-base" placeholder="Search..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
-             </div>
-             <div class="checkbox-list-wrapper shadow-inner mt-1">
-                 <div id="fieldSelectionContainer" class="flex flex-col"></div>
-             </div>
-          </div>
-      </div>
-      
-      <div class="flex flex-col md:flex-row-reverse gap-3 mt-2 shrink-0">
-         <button type="button" id="generateButton" class="btn-primary flex-grow" onclick="handleGenerate()">
-           <i class="ph-bold ph-magic-wand text-xl"></i> Generate Card(s)
-         </button>
-         <button type="button" id="backToProfilesButtonV1" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-           <i class="ph-bold ph-sign-out text-xl"></i> Logout
-         </button>
-     </div>
-    </div>
-
-    <!-- App V2 Content (Adhoc - 1 Full Column) -->
-    <div id="app-v2-content" class="app-view">
-      <div class="section-panel h-full">
-         <div class="flex flex-row flex-nowrap items-center justify-between w-full border-b pb-3 mb-2 gap-2" style="border-color: var(--glass-border);">
-             <div class="flex flex-row items-center gap-2 overflow-hidden shrink min-w-0">
-               <input type="checkbox" id="checkAllTraineesV2" class="header-checkbox shrink-0" title="Select/Deselect All">
-               <h2 class="text-lg font-bold truncate">Select Trainee(s)</h2>
-             </div>
-             <span id="traineeCountTextV2" class="shrink-0 text-xs font-bold px-2 py-1 rounded-full bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap">0 / 0</span>
-         </div>
-         
-         <div class="relative w-full mb-1">
-           <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-           <input type="text" id="traineeSearchV2" class="input-field search-box w-full text-sm md:text-base" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV2', 'traineeSelectionContainerV2')">
-         </div>
-         <div class="checkbox-list-wrapper shadow-inner mt-2">
-             <div id="traineeSelectionContainerV2" class="flex flex-col"></div>
-         </div>
-      </div>
-      
-      <div class="flex flex-col md:flex-row-reverse gap-3 mt-2 shrink-0">
-         <button type="button" id="generateButtonV2" class="btn-primary flex-grow" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="handleGenerateV2()">
-           <i class="ph-bold ph-magic-wand text-xl"></i> Generate Card(s)
-         </button>
-         <button type="button" id="backToProfilesButtonV2" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-           <i class="ph-bold ph-sign-out text-xl"></i> Logout
-         </button>
-     </div>
-    </div>
-  </main>
-
-  <!-- Generation Results View -->
-  <div id="app-results-view" class="app-view">
-    <div class="section-panel h-full">
-       <div class="flex flex-row items-center gap-2 w-full border-b pb-3 mb-2" style="border-color: var(--glass-border);"> 
-         <i class="ph-bold ph-check-circle text-green-500 text-xl shrink-0"></i>
-         <h2 class="text-lg font-bold truncate">Generation Results</h2> 
-       </div>
-       <div id="resultMessage" class="result-list p-2 rounded-lg" style="background-color: var(--input-bg); border: 1px solid var(--glass-border);"></div>
-    </div>
-    
-    <div class="flex flex-col md:flex-row-reverse gap-3 mt-2 shrink-0">
-       <button type="button" id="backToSelectionsButton" class="btn-primary flex-grow" onclick="backToSelections()">
-         <i class="ph-bold ph-arrow-u-up-left text-xl"></i> Back to Selections
-       </button>
-       <button type="button" id="backToProfilesButtonResults" class="btn-secondary flex-grow" onclick="goToLandingPage()">
-         <i class="ph-bold ph-sign-out text-xl"></i> Logout
-       </button>
-   </div>
-  </div>
-
-  <!-- Settings View (STACKED Layout) -->
-  <div id="settings-page" class="app-view">
-   <div class="stacked-panels">
-       
-       <!-- Regular Settings -->
-       <div class="section-panel">
-           <div class="flex flex-row items-center gap-2 w-full pb-2 mb-2 border-b" style="border-color: var(--glass-border);">
-               <input type="checkbox" id="checkAllSettingsRegular" class="header-checkbox shrink-0">
-               <h2 class="font-bold text-blue-500 text-lg truncate">Regular Fields</h2>
-           </div>
-           <div class="relative w-full">
-             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsRegularSearch" class="input-field search-box w-full text-sm md:text-base" placeholder="Search fields..." onkeyup="filterList('settingsRegularSearch', 'settings-regular-fields')">
-           </div>
-           <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-regular-fields" class="flex flex-col"></div></div>
-       </div>
-
-       <!-- Adhoc Settings -->
-       <div class="section-panel">
-           <div class="flex flex-row items-center gap-2 w-full pb-2 mb-2 border-b" style="border-color: var(--glass-border);">
-                 <input type="checkbox" id="checkAllSettingsAdhoc" class="header-checkbox shrink-0">
-                 <h2 class="font-bold text-purple-500 text-lg truncate">Adhoc Fields</h2>
-           </div>
-           <div class="relative w-full">
-             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsAdhocSearch" class="input-field search-box w-full text-sm md:text-base" placeholder="Search fields..." onkeyup="filterList('settingsAdhocSearch', 'settings-adhoc-fields')">
-           </div>
-           <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-adhoc-fields" class="flex flex-col"></div></div>
-       </div>
-
-       <!-- Password Settings -->
-       <div class="section-panel">
-           <div class="flex flex-row items-center gap-2 w-full pb-2 border-b shrink-0" style="border-color: var(--glass-border);">
-               <i class="ph-bold ph-lock-key text-xl shrink-0" style="color: var(--text-color);"></i>
-               <h2 class="font-bold text-lg truncate" style="color: var(--text-color);">Change Passwords</h2>
-           </div>
-           <div class="flex-grow overflow-y-auto pr-2 space-y-4 pt-2">
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">Regular Volunteer</label>
-                 <div class="relative">
-                   <input type="password" id="new-reg-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'new-reg-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <div class="border-t" style="border-color: var(--glass-border);"></div>
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">Adhoc Volunteer</label>
-                 <div class="relative">
-                   <input type="password" id="new-adhoc-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'new-adhoc-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <div class="border-t" style="border-color: var(--glass-border);"></div>
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">New Settings Admin</label>
-                 <div class="relative">
-                   <input type="password" id="new-settings-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'new-settings-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">Confirm Settings Admin</label>
-                 <div class="relative">
-                   <input type="password" id="confirm-settings-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'confirm-settings-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <p id="password-change-error" class="text-red-500 text-sm font-bold text-center"></p>
-               <button type="button" class="btn-secondary text-sm py-2" onclick="handleUpdatePasswords()"><i class="ph-bold ph-floppy-disk"></i> Save Passwords Only</button>
-           </div>
-       </div>
-   </div>
-   
-   <div class="flex flex-col md:flex-row-reverse gap-3 mt-2 shrink-0">
-       <button type="button" class="btn-primary bg-green-600 hover:bg-green-700 md:flex-grow" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="handleSaveSettings()">
-         <i class="ph-bold ph-floppy-disk text-xl"></i> Save Field Settings
-       </button>
-       <button type="button" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-         <i class="ph-bold ph-x text-xl"></i> Cancel
-       </button>
-   </div>
+      <button type="submit" id="general-login-btn" class="btn-primary py-3"><i class="ph-bold ph-sign-in text-xl"></i> Login</button>
+    </form>
   </div>
 </div>
 
-<!-- Settings/Specific Password Modal Overlay (Used when gear icon is clicked) -->
-<div id="password-modal" class="modal-overlay" style="display: none;">
-  <!-- Click background to close -->
-  <div class="absolute inset-0 bg-gray-900 bg-opacity-50" onclick="closePasswordModal()"></div>
-  
-  <div class="glass-strong p-6 rounded-2xl w-full max-w-sm shadow-2xl relative z-10 mx-4">
+<!-- IN-APP TRAINEE VIEWER -->
+<div id="main-app-content" class="hidden flex-grow flex flex-col">
+  <main class="flex-grow p-3 pb-24 max-w-2xl mx-auto w-full space-y-4">
+    <div class="space-y-3 sticky top-16 z-30 pt-1 pb-2" style="background: var(--bg-color);">
+      <select id="trainee-select" class="input-field text-lg font-bold shadow-sm" onchange="fetchTraineeInfo()">
+          <option value="" disabled selected>Select Trainee to View...</option>
+      </select>
+    </div>
+    
+    <div id="loader-view" class="hidden text-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+      <p class="opacity-70 text-sm animate-pulse">Fetching Profile...</p>
+    </div>
+    
+    <div id="card-container" class="space-y-3 pb-10"></div>
+  </main>
+</div>
+
+<!-- FLOATING PASSWORD MODAL FOR ADMIN SETTINGS -->
+<div id="password-modal" class="modal-overlay">
+  <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" onclick="closePasswordModal()"></div>
+  <div class="glass-strong p-6 rounded-3xl w-full max-w-sm shadow-2xl relative z-10 mx-4 fade-in">
    <div class="flex justify-between items-center mb-4">
-     <h3 id="password-modal-title" class="text-lg font-bold">Admin Access</h3>
-     <button onclick="closePasswordModal()" class="opacity-60 hover:opacity-100 transition-opacity"><i class="ph-bold ph-x text-xl"></i></button>
+     <h3 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-lock-key text-blue-500"></i> Admin Access</h3>
+     <button onclick="closePasswordModal()" class="opacity-60 hover:opacity-100 transition-opacity outline-none focus:outline-none"><i class="ph-bold ph-x text-xl"></i></button>
    </div>
    
-   <form onsubmit="event.preventDefault(); handlePasswordSubmit();">
+   <form onsubmit="event.preventDefault(); handleAdminAuth();">
      <div class="mb-6">
-       <!-- Error positioned exactly above input -->
-       <p id="password-modal-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
+       <p id="admin-error-msg" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
        <div class="relative">
-         <input id="password-input" type="password" class="input-field text-center tracking-widest text-xl p-3 pr-10 w-full" placeholder="••••••••" oninput="document.getElementById('password-modal-error').classList.add('hidden')">
-         <button type="button" onclick="togglePasswordIcon(this, 'password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i id="modal-password-icon" class="ph-bold ph-eye-slash text-xl"></i></button>
+         <input id="admin-pass" type="password" class="input-field text-center tracking-widest text-xl p-3 pr-10 w-full" placeholder="••••••••" oninput="document.getElementById('admin-error-msg').classList.add('hidden')">
+         <button type="button" onclick="togglePasswordIcon(this, 'admin-pass')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500 outline-none focus:outline-none"><i class="ph-bold ph-eye-slash text-xl"></i></button>
        </div>
      </div>
      <div class="flex gap-3">
          <button type="button" class="btn-secondary py-3" onclick="closePasswordModal()">Cancel</button>
-         <button type="submit" class="btn-primary py-3">Unlock</button>
+         <button type="submit" id="btn-admin-login" class="btn-primary py-3">Unlock</button>
      </div>
    </form>
   </div>
 </div>
 
+<!-- FULL ADMIN SETTINGS MODAL -->
+<div id="modal-settings" class="fixed inset-0 flex items-center justify-center hidden" style="z-index: 100;">
+  <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" onclick="toggleSettingsModal(false)"></div>
+  <div class="glass-strong w-full h-full md:h-auto md:max-w-xl p-5 md:rounded-2xl shadow-2xl relative overflow-y-auto flex flex-col fade-in" style="max-height: 90vh;">
+    
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center mb-4 shrink-0 border-b border-opacity-10 pb-3" style="border-color: var(--glass-border);">
+      <h2 class="text-xl font-bold flex items-center gap-2"><i class="ph-bold ph-gear text-blue-500"></i> Admin Settings</h2>
+      <button onclick="toggleSettingsModal(false)" class="outline-none focus:outline-none"><i class="ph-bold ph-x text-xl opacity-60 hover:opacity-100"></i></button>
+    </div>
+    
+    <!-- Modal Content -->
+    <div class="space-y-6 pb-6">
+      <!-- Generation Tool -->
+      <div class="p-4 rounded-xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);">
+          <h3 class="font-bold mb-1 flex items-center gap-2"><i class="ph-bold ph-magic-wand text-blue-500"></i> AI Card Generator</h3>
+          <p class="text-xs opacity-70 mb-3">Pre-generate info cards directly to the sheet.</p>
+          <div class="flex gap-2 mb-2">
+              <select id="admin-regen-select" class="input-field py-2 text-sm flex-grow"></select>
+              <button onclick="runAdminGeneration()" id="btn-admin-gen" class="bg-blue-600 text-white font-bold text-sm px-4 rounded-lg shadow-md hover:bg-blue-700 outline-none focus:outline-none">Run</button>
+          </div>
+          <p id="admin-regen-status" class="text-xs font-bold text-blue-500 hidden text-center mt-1">Processing...</p>
+      </div>
+
+      <!-- Field Mapping -->
+      <div>
+         <h3 class="font-bold mb-2 border-b border-opacity-10 pb-1" style="border-color: var(--glass-border);">Role Data Access Mapping</h3>
+         <div class="space-y-3">
+             <div>
+               <label class="block text-xs font-bold opacity-70 mb-1">Regular Volunteer Fields</label>
+               <div class="checkbox-list-wrapper"><div id="settings-regular-fields" class="flex flex-col"></div></div>
+             </div>
+             <div>
+               <label class="block text-xs font-bold opacity-70 mb-1">Adhoc Volunteer Fields</label>
+               <div class="checkbox-list-wrapper"><div id="settings-adhoc-fields" class="flex flex-col"></div></div>
+             </div>
+         </div>
+         <button onclick="handleSaveFieldSettings()" class="bg-green-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90 outline-none focus:outline-none">Save Field Mappings</button>
+      </div>
+
+      <!-- Passwords -->
+      <div>
+         <h3 class="font-bold mb-2 border-b border-opacity-10 pb-1" style="border-color: var(--glass-border);">Change Access Passwords</h3>
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+             <div><label class="block text-xs font-bold opacity-60 mb-1">REGULAR VOL.</label><input type="text" id="set-regPass" class="input-field py-1.5 px-2 text-sm"></div>
+             <div><label class="block text-xs font-bold opacity-60 mb-1">ADHOC VOL.</label><input type="text" id="set-adhocPass" class="input-field py-1.5 px-2 text-sm"></div>
+             <div><label class="block text-xs font-bold opacity-60 mb-1">ADMIN SETTINGS</label><input type="text" id="set-adminPass" class="input-field py-1.5 px-2 text-sm"></div>
+         </div>
+         <button onclick="handleSavePasswords()" class="bg-yellow-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90 outline-none focus:outline-none">Update Passwords Only</button>
+      </div>
+
+      <!-- Close Button -->
+      <button onclick="toggleSettingsModal(false)" class="btn-secondary w-full py-2.5 rounded-lg font-bold shadow-md mt-6 outline-none focus:outline-none">
+        <i class="ph-bold ph-x text-lg"></i> Close Settings
+      </button>
+
+    </div>
+  </div>
+</div>
+
 <script>
 // ==========================================
-// THEME & UTILITY LOGIC
+// BACKGROUND DATA LOAD
+// ==========================================
+let appData = null;
+let currentProfile = '';
+let dataPromise = callBackend('getInitialData').then(d => { appData = d; return d; }).catch(e => console.error(e));
+
+if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
+if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+
+async function callBackend(action, payload = {}) {
+  const response = await fetch(GAS_WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, payload })
+  });
+  const text = await response.text();
+  let result;
+  try { result = JSON.parse(text); } catch(e) { throw new Error("Connection failed. Check permissions."); }
+  if (!result.success) throw new Error(result.error);
+  return result.data;
+}
+
+// ==========================================
+// UI LOGIC & FLOW
 // ==========================================
 function toggleTheme(save = true) {
-  const html = document.documentElement;
-  const isDark = html.classList.toggle('dark');
+  const isDark = document.documentElement.classList.toggle('dark');
   if (save) localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
 
-function togglePasswordIcon(btn, inputId) {
-  const input = document.getElementById(inputId);
-  const icon = btn.querySelector('i');
+function togglePasswordIcon(btn, id) {
+  const input = document.getElementById(id), i = btn.querySelector('i');
   const isPass = input.type === 'password';
   input.type = isPass ? 'text' : 'password';
-  icon.classList.replace(isPass ? 'ph-eye-slash' : 'ph-eye', isPass ? 'ph-eye' : 'ph-eye-slash');
+  i.className = isPass ? 'ph-bold ph-eye text-xl' : 'ph-bold ph-eye-slash text-xl';
 }
 
 function showToast(msg, isError = false) {
   const el = document.getElementById('toast');
   el.innerText = msg;
+  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
   
-  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
+  // Safe color application
+  el.classList.remove("text-red-500", "border-red-500", "bg-red-500", "bg-opacity-10", "text-blue-500", "border-blue-500", "bg-blue-500");
   
-  if (isError) {
-    el.classList.add("text-red-500", "border-red-500", "bg-red-500/10");
-  } else {
-    el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500/10");
-  }
+  if(isError) el.classList.add("text-red-500", "border-red-500", "bg-red-500", "bg-opacity-10");
+  else el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500", "bg-opacity-10");
   
-  if(window.toastTimer) clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => {
-    el.classList.add('hidden');
-  }, 3500);
+  if(window.tTimer) clearTimeout(window.tTimer);
+  window.tTimer = setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
-if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+async function handleGeneralLogin() {
+  const pass = document.getElementById('general-password-input').value;
+  const err = document.getElementById('general-login-error');
+  const btn = document.getElementById('general-login-btn');
+  if(!pass) return err.classList.remove('hidden');
 
-// ==========================================
-// APP LOGIC
-// ==========================================
-let availableFields =[], allTrainees =[], appSettings = {};
-let totalTrainees = 0, previousAppView = '', selectedProfileForAppV1 = 'Regular Volunteer';
-let profileOrSettingsToAuth = '', currentProfile = '';
-let areDefaultsSelected = true;
+  btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Verifying...'; btn.disabled = true;
 
-const fieldsToExclude =["Project", "Trainee's Short Name", "Links for House Visit", "Map Link to Trainee's House", "SGEnable Concession Card CAN Number", "Links", "Contact Details (Home / Office / Mobile)", "Trainee's Photo"];
-const fieldNameUpdates = { "Primary Contact Name": "Contact 1 Relation (Name)", "Contact 3 Relation / Name": "Contact 3 Relation (Name)", "Age (Current Year)": "Age", "Spoken Language": "Spoken Language / Dialect" };
-let defaultFieldHeadersForAppV2Values =[];
-
-/**
- * Utility function to handle requests to the GAS backend.
- */
-async function callBackend(action, payload = {}) {
   try {
-    const response = await fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, payload })
-    });
+    if (!appData) await dataPromise; // Ensure bg-load completed
+    const profile = await callBackend('login', { password: pass });
+    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; btn.disabled = false;
     
-    const rawText = await response.text();
-    let result;
-    try {
-      result = JSON.parse(rawText);
-    } catch (e) {
-      if (rawText.trim().startsWith('<')) {
-        throw new Error(`Received HTML page from ${ACTIVE_ENV}. Check Google Apps Script "Who has access" settings.`);
-      }
-      throw new Error("Invalid response format from server.");
+    if (profile === 'Settings') return openAdminSettingsAuth(true);
+    if (profile) {
+       currentProfile = profile;
+       
+       // Update and show user badge
+       const badge = document.getElementById('user-badge');
+       badge.innerText = profile;
+       badge.className = profile === 'Regular Volunteer' 
+          ? 'self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-500 bg-opacity-20 text-green-500 border border-green-500 border-opacity-30'
+          : 'self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-yellow-500 bg-opacity-20 text-yellow-500 border border-yellow-500 border-opacity-30';
+       badge.classList.remove('hidden');
+       
+       // Show logout button
+       document.getElementById('btn-logout').classList.remove('hidden');
+       
+       populateTraineeSelect('trainee-select');
+       document.getElementById('landing-page').style.display = 'none';
+       document.getElementById('main-app-content').style.display = 'flex';
+    } else {
+       err.innerText = "Incorrect Password"; err.classList.remove('hidden');
     }
-    if (!result.success) throw new Error(result.error);
-    return result.data;
-  } catch (error) {
-    if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
-       throw new Error("Connection failed/timed out. Backend permissions might be wrong, or generation took too long.");
-    }
-    throw error;
+  } catch(e) {
+    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; btn.disabled = false;
+    err.innerText = "Error: " + e.message; err.classList.remove('hidden');
   }
 }
 
-function filterList(inputId, containerId) {
- const input = document.getElementById(inputId);
- const filter = input.value.toUpperCase();
- const container = document.getElementById(containerId);
- const items = container.getElementsByTagName('label');
- let allVisibleAreChecked = true;
- let visibleCount = 0;
- for (let i = 0; i < items.length; i++) {
-   const span = items[i].getElementsByTagName('span')[0];
-   if (span) {
-     const txtValue = span.textContent || span.innerText;
-     if (txtValue.toUpperCase().indexOf(filter) > -1) {
-       items[i].style.display = "flex";
-       visibleCount++;
-       if (!items[i].querySelector('input').checked) allVisibleAreChecked = false;
-     } else {
-       items[i].style.display = "none";
-     }
-   }
- }
- let checkAllBox;
- if (containerId.includes('traineeSelectionContainerV2')) checkAllBox = document.getElementById('checkAllTraineesV2');
- else if (containerId.includes('traineeSelectionContainer')) checkAllBox = document.getElementById('checkAllTrainees');
- else if (containerId.includes('fieldSelectionContainer')) checkAllBox = document.getElementById('checkAllFields');
- else if (containerId.includes('settings-regular-fields')) checkAllBox = document.getElementById('checkAllSettingsRegular');
- else if (containerId.includes('settings-adhoc-fields')) checkAllBox = document.getElementById('checkAllSettingsAdhoc');
- if (checkAllBox) checkAllBox.checked = visibleCount > 0 && allVisibleAreChecked;
-}
-
-/**
-* Main entry point utilizing DOMContentLoaded
-*/
-document.addEventListener('DOMContentLoaded', () => {
- closePasswordModal(); 
-
- if (ACTIVE_ENV === 'DEV') {
-   document.getElementById('dev-banner').style.display = 'block';
- }
- 
- setLoadingState(true, 'Connecting to Server...');
- callBackend('getInitialData')
-   .then(data => {
-     appSettings = data.appSettings;
-     allTrainees = data.allTrainees;
-     
-     // PROCESSED EXACTLY ONCE HERE TO PREVENT DOUBLE MUTATION
-     availableFields = processAvailableFields(data.availableFields);
-     
-     setLoadingState(false);
-     switchView('landing-page');
-   })
-   .catch(err => {
-     setLoadingState(false);
-     switchView('loader');
-     document.getElementById('loader-message').innerHTML = `<span class="text-red-500 font-bold">Connection Failed</span><br><span class="text-sm opacity-80 mt-1 block">${err.message}</span>`;
-     document.querySelector('.spinner').style.display = 'none';
-     document.getElementById('loader-retry-btn').classList.remove('hidden');
-   });
-});
-
-function switchView(viewId) {
- document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
- document.getElementById(viewId).style.display = 'flex';
-}
-
-function setLoadingState(isLoading, message = 'Loading...') {
- const mainAppElements = document.querySelectorAll('#main-app-content button, #main-app-content input, #landing-page button, #settings-page button, #settings-page input');
- mainAppElements.forEach(el => el.disabled = isLoading);
- 
- if (isLoading) {
-   document.getElementById('loader-message').textContent = message;
-   document.querySelector('.spinner').style.display = 'block';
-   document.getElementById('loader-retry-btn').classList.add('hidden');
-   switchView('loader');
- }
-}
-
-// ----------------------------------------------------
-// NEW UNIFIED LOGIN LOGIC
-// ----------------------------------------------------
-function handleGeneralLogin() {
-  const password = document.getElementById('general-password-input').value;
-  const errorEl = document.getElementById('general-login-error');
+function logout() {
+  currentProfile = '';
+  document.getElementById('general-password-input').value = '';
+  document.getElementById('card-container').innerHTML = '';
+  document.getElementById('trainee-select').value = '';
   
-  if (!password) {
-    errorEl.textContent = 'Password cannot be empty.';
-    errorEl.classList.remove('hidden');
-    return;
-  }
-
-  const submitBtn = document.getElementById('general-login-btn');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Verifying...';
-  submitBtn.disabled = true;
-
-  callBackend('login', { password })
-    .then(profile => {
-      submitBtn.innerHTML = originalText;
-      submitBtn.disabled = false;
-      
-      if (profile) {
-        if (profile === 'Settings') {
-          loadSettingsPage();
-        } else {
-          currentProfile = profile;
-          const appVersion = profile === 'Regular Volunteer' ? 'AppV1' : 'AppV2';
-          try {
-            loadApp(appVersion, currentProfile);
-          } catch(e) {
-            console.error(e);
-            errorEl.innerHTML = `Loading Error: ${e.message}`;
-            errorEl.classList.remove('hidden');
-          }
-        }
-      } else {
-        errorEl.textContent = 'Incorrect password. Please try again.';
-        errorEl.classList.remove('hidden');
-        document.getElementById('general-password-input').select();
-      }
-    })
-    .catch(err => {
-      submitBtn.innerHTML = originalText;
-      submitBtn.disabled = false;
-      errorEl.innerHTML = err.message.includes('Unknown action') 
-        ? `Backend Error: Please deploy the latest Code.gs update.` 
-        : `Error: ${err.message}`;
-      errorEl.classList.remove('hidden');
-    });
+  // Hide badge and logout button
+  document.getElementById('user-badge').classList.add('hidden');
+  document.getElementById('btn-logout').classList.add('hidden');
+  
+  document.getElementById('main-app-content').style.display = 'none';
+  document.getElementById('landing-page').style.display = 'flex';
 }
 
-// ----------------------------------------------------
-// SETTINGS GEAR ICON LOGIC
-// ----------------------------------------------------
-function promptForPassword(target) {
- profileOrSettingsToAuth = target; // Will usually be 'Settings'
- const title = document.getElementById('password-modal-title');
- const input = document.getElementById('password-input');
- const error = document.getElementById('password-modal-error');
- 
- title.textContent = `Admin Access`;
- error.classList.add('hidden');
- input.value = '';
- input.type = 'password';
- document.getElementById('modal-password-icon').className = 'ph-bold ph-eye-slash text-xl'; 
- document.getElementById('password-modal').style.display = 'flex';
- 
- setTimeout(() => { try { input.focus(); } catch(e) {} }, 100);
+function populateTraineeSelect(id, includeAll = false) {
+  if (!appData) return;
+  const select = document.getElementById(id);
+  select.innerHTML = (includeAll ? '<option value="ALL">All Trainees (Batch)</option>' : '<option value="" disabled selected>Select Trainee...</option>') 
+                   + appData.allTrainees.map(t => `<option value="${t}">${t}</option>`).join('');
+}
+
+// ==========================================
+// VIEWER ENGINE
+// ==========================================
+function formatText(t) { return String(t).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); }
+
+async function fetchTraineeInfo() {
+  const name = document.getElementById('trainee-select').value;
+  if (!name) return;
+  
+  document.getElementById('card-container').innerHTML = '';
+  document.getElementById('loader-view').classList.remove('hidden');
+  
+  try {
+     const data = await callBackend('getTraineeCardData', { traineeName: name, profile: currentProfile });
+     document.getElementById('loader-view').classList.add('hidden');
+     renderTraineeCard(data);
+  } catch (e) {
+     document.getElementById('loader-view').classList.add('hidden');
+     showToast(e.message, true);
+  }
+}
+
+function renderTraineeCard(data) {
+  let html = `<div class="glass p-5 rounded-3xl shadow-sm text-center mb-4 fade-in">`;
+  if (data.photoBase64) html += `<img src="data:${data.photoMime};base64,${data.photoBase64}" class="w-32 h-32 object-cover rounded-full mx-auto shadow-md mb-3 border-4 border-blue-500">`;
+  else html += `<div class="w-32 h-32 rounded-full mx-auto shadow-inner mb-3 bg-gray-200 dark:bg-gray-800 flex items-center justify-center border-4 border-gray-400"><i class="ph-bold ph-user text-5xl text-gray-400"></i></div>`;
+  html += `<h2 class="text-2xl font-bold leading-tight">${formatText(data.fullName)}</h2></div>`;
+  
+  if (!data.categories || data.categories.length === 0) {
+     html += `<div class="text-center opacity-70 p-4">No specific fields assigned for viewing.</div>`;
+  } else {
+     data.categories.forEach(cat => {
+         let fieldsHtml = cat.fields.map(f => `<div class="mb-4 last:mb-0"><strong class="block text-xs uppercase tracking-widest opacity-60 mb-0.5">${f.label}</strong><div class="text-sm">${formatText(f.value)}</div></div>`).join('');
+         html += `<details class="group p-1 rounded-2xl ${cat.bgClass} shadow-sm mb-3 transition-all duration-300 hover:shadow-md fade-in" open>
+                    <summary class="flex items-center gap-3 p-3.5 cursor-pointer select-none">
+                      <i class="ph-fill ${cat.icon} ${cat.color} text-2xl"></i>
+                      <h3 class="font-bold ${cat.color} flex-grow text-lg">${cat.title}</h3>
+                      <i class="ph-bold ph-caret-down text-lg ${cat.color} chevron opacity-60"></i>
+                    </summary>
+                    <div class="px-5 pb-5 leading-relaxed opacity-90 border-t border-black border-opacity-5 dark:border-white dark:border-opacity-5 pt-4 text-justify">
+                      ${fieldsHtml}
+                    </div>
+                  </details>`;
+     });
+  }
+  document.getElementById('card-container').innerHTML = html;
+}
+
+// ==========================================
+// ADMIN SETTINGS
+// ==========================================
+function toggleSettingsModal(show) { 
+  document.getElementById('modal-settings').classList.toggle('hidden', !show); 
+}
+
+function openAdminSettingsAuth(skipPass = false) {
+  if (skipPass) {
+     loadAdminDashboard();
+  } else {
+     document.getElementById('admin-pass').value = '';
+     document.getElementById('admin-error-msg').classList.add('hidden');
+     document.getElementById('password-modal').style.display = 'flex';
+     setTimeout(() => { try { document.getElementById('admin-pass').focus(); } catch(e) {} }, 100);
+  }
 }
 
 function closePasswordModal() {
- document.getElementById('password-modal').style.display = 'none';
- if (document.activeElement) document.activeElement.blur();
+  document.getElementById('password-modal').style.display = 'none';
 }
 
-function handlePasswordSubmit() {
- const password = document.getElementById('password-input').value;
- const errorEl = document.getElementById('password-modal-error');
- if (!password) {
-   errorEl.textContent = 'Password cannot be empty.';
-   errorEl.classList.remove('hidden');
-   return;
- }
- 
- const submitBtn = document.querySelector('#password-modal button[type="submit"]');
- const originalText = submitBtn.innerText;
- submitBtn.innerText = 'Verifying...';
- submitBtn.disabled = true;
- 
- callBackend('verifySettingsPassword', { password })
-   .then(isValid => {
-     submitBtn.innerText = originalText;
-     submitBtn.disabled = false;
-     
-     if (isValid) {
-       closePasswordModal();
-       loadSettingsPage();
-     } else {
-       errorEl.textContent = 'Incorrect admin password.';
-       errorEl.classList.remove('hidden');
-       document.getElementById('password-input').select();
+async function handleAdminAuth() {
+  const pass = document.getElementById('admin-pass').value;
+  const btn = document.getElementById('btn-admin-login');
+  if(!pass) return;
+
+  btn.innerHTML = "Verifying..."; btn.disabled = true;
+  try {
+     const valid = await callBackend('verifySettingsPassword', { password: pass });
+     if(valid) {
+         closePasswordModal();
+         loadAdminDashboard();
+     } else { 
+         document.getElementById('admin-error-msg').classList.remove('hidden'); 
      }
-   })
-   .catch(err => {
-     submitBtn.innerText = originalText;
-     submitBtn.disabled = false;
-     errorEl.innerHTML = `Error: ${err.message}`;
-     errorEl.classList.remove('hidden');
-   });
+  } catch(e) { showToast(e.message, true); }
+  btn.innerHTML = "Unlock"; btn.disabled = false;
 }
 
-function processAvailableFields(fields) {
- if (!fields || !Array.isArray(fields)) return[];
- let processedFields = fields
-   .filter(field => !fieldsToExclude.includes(field.label))
-   .map(field => fieldNameUpdates[field.label] ? { label: fieldNameUpdates[field.label], value: field.value } : field);
- const contactFieldLabels =["Contact 1 Relation (Name)", "Contact 1 Number", "Contact 2 Relation (Name)", "Contact 2 Number", "Contact 3 Relation (Name)", "Contact 3 Number"];
- if (processedFields.some(f => contactFieldLabels.includes(f.label))) {
-   processedFields = processedFields.filter(f => !contactFieldLabels.includes(f.label));
-   const careGiverField = { label: 'Caregiver Contact Info', value: 'caregiverContactInfo' };
-   const addressIndex = processedFields.findIndex(f => f.label === 'Address');
-   processedFields.splice(addressIndex !== -1 ? addressIndex + 1 : processedFields.length, 0, careGiverField);
- }
- return processedFields;
+function loadAdminDashboard() {
+  toggleSettingsModal(true);
+  populateTraineeSelect('admin-regen-select', true);
+  
+  if(!appData) return;
+  const regDef = appData.appSettings.profileDefaultFieldMappings['Regular Volunteer'] ||[];
+  const adhocDef = appData.appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] ||[];
+  
+  document.getElementById('settings-regular-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${regDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');
+  document.getElementById('settings-adhoc-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${adhocDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');['set-regPass', 'set-adhocPass', 'set-adminPass'].forEach(id => document.getElementById(id).value = '');
 }
 
-function loadSettingsPage() {
- populateSettingsForm();
- switchView('settings-page');
+async function runAdminGeneration() {
+  const sel = document.getElementById('admin-regen-select').value;
+  const stat = document.getElementById('admin-regen-status');
+  const btn = document.getElementById('btn-admin-gen');
+  
+  let list = sel === 'ALL' ? appData.allTrainees :[sel];
+  if(list.length === 0) return;
+  
+  stat.classList.remove('hidden'); btn.disabled = true; btn.style.opacity = '0.5';
+  
+  for(let i=0; i<list.length; i++) {
+     stat.innerText = `Processing ${i+1}/${list.length} : ${list[i]}`;
+     try { await callBackend('adminGenerateCardText', { traineeName: list[i] }); }
+     catch(e) { console.error("Failed for", list[i], e); }
+  }
+  
+  stat.innerText = "Completed!";
+  setTimeout(() => stat.classList.add('hidden'), 3000);
+  btn.disabled = false; btn.style.opacity = '1';
 }
 
-function populateSettingsForm() {
- const regularContainer = document.getElementById('settings-regular-fields');
- const adhocContainer = document.getElementById('settings-adhoc-fields');
- const allAvailableFields =[...new Set(availableFields.map(f => f.label))].sort();
- 
- const defaultMappings = appSettings.profileDefaultFieldMappings || {};
- const regularDefaults = defaultMappings['Regular Volunteer'] ||[];
- const adhocDefaults = defaultMappings['Adhoc Volunteer / Exposure Session'] || defaultMappings['Adhoc Volunteer'] ||[];
- 
- let regularHtml =[];
- let adhocHtml =[];
- 
- allAvailableFields.forEach(fieldLabel => {
-   const regularId = `setting-reg-${fieldLabel.replace(/\W/g, '_')}`;
-   const adhocId = `setting-adhoc-${fieldLabel.replace(/\W/g, '_')}`;
-   const regularChecked = regularDefaults.includes(fieldLabel) ? 'checked' : '';
-   regularHtml.push(`<label for="${regularId}"><input type="checkbox" value="${fieldLabel}" id="${regularId}" ${regularChecked}><span>${fieldLabel}</span></label>`);
-   const adhocChecked = adhocDefaults.includes(fieldLabel) ? 'checked' : '';
-   adhocHtml.push(`<label for="${adhocId}"><input type="checkbox" value="${fieldLabel}" id="${adhocId}" ${adhocChecked}><span>${fieldLabel}</span></label>`);
- });
- 
- regularContainer.innerHTML = regularHtml.join('');
- adhocContainer.innerHTML = adhocHtml.join('');
- 
- document.getElementById('checkAllSettingsRegular').addEventListener('change', function() {
-   document.querySelectorAll('#settings-regular-fields input[type="checkbox"]').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
- });
- document.getElementById('checkAllSettingsAdhoc').addEventListener('change', function() {
-   document.querySelectorAll('#settings-adhoc-fields input[type="checkbox"]').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
- });['new-reg-pass', 'new-adhoc-pass', 'new-settings-pass', 'confirm-settings-pass'].forEach(id => {
-     let el = document.getElementById(id);
-     el.value = '';
-     el.type = 'password';
-     el.nextElementSibling.querySelector('i').className = 'ph-bold ph-eye-slash text-lg';
- });
- document.getElementById('password-change-error').textContent = '';
+async function handleSaveFieldSettings() {
+  const newMappings = {
+    "Regular Volunteer": Array.from(document.querySelectorAll('#settings-regular-fields input:checked')).map(cb => cb.value),
+    "Adhoc Volunteer / Exposure Session": Array.from(document.querySelectorAll('#settings-adhoc-fields input:checked')).map(cb => cb.value)
+  };
+  showToast("Saving...", false);
+  try {
+    await callBackend('saveAppSettings', { newMappings });
+    showToast("Field Settings Saved!");
+  } catch(e) { showToast(e.message, true); }
 }
 
-function handleSaveSettings() {
- setLoadingState(true, "Saving configurations...");
- const newMappings = {
-   "Regular Volunteer": Array.from(document.querySelectorAll('#settings-regular-fields input:checked')).map(cb => cb.value),
-   "Adhoc Volunteer / Exposure Session": Array.from(document.querySelectorAll('#settings-adhoc-fields input:checked')).map(cb => cb.value)
- };
- callBackend('saveAppSettings', { newMappings })
-   .then(() => {
-       showToast("Settings Saved Successfully!");
-       setTimeout(() => location.reload(), 1000);
-   }) 
-   .catch(err => {
-     setLoadingState(false);
-     switchView('settings-page');
-     showToast(`Failed: ${err.message}`, true);
-   });
-}
-
-function handleUpdatePasswords() {
- const newRegPass = document.getElementById('new-reg-pass').value;
- const newAdhocPass = document.getElementById('new-adhoc-pass').value;
- const newSettingsPass = document.getElementById('new-settings-pass').value;
- const confirmSettingsPass = document.getElementById('confirm-settings-pass').value;
- const errorEl = document.getElementById('password-change-error');
- errorEl.textContent = '';
- 
- if (newSettingsPass && newSettingsPass !== confirmSettingsPass) {
-   errorEl.textContent = 'New Settings passwords do not match.';
-   return;
- }
- 
- const passwordsToUpdate = {};
- if (newRegPass) passwordsToUpdate['Regular Volunteer'] = newRegPass;
- if (newAdhocPass) passwordsToUpdate['Adhoc Volunteer'] = newAdhocPass;
- if (newSettingsPass) passwordsToUpdate['Settings'] = newSettingsPass;
- 
- if (Object.keys(passwordsToUpdate).length === 0) {
-   errorEl.textContent = 'Please enter a new password in at least one field.';
-   return;
- }
- 
- setLoadingState(true, 'Updating passwords...');
- callBackend('updatePasswords', { passwords: passwordsToUpdate })
-   .then(message => {
-     showToast("Passwords Updated Successfully!");
-     setTimeout(() => location.reload(), 1500);
-   })
-   .catch(err => {
-     setLoadingState(false);
-     switchView('settings-page');
-     errorEl.textContent = `Error: ${err.message}`;
-   });
-}
-
-function loadApp(appVersion, profile = '') {
- const defaultMappings = appSettings.profileDefaultFieldMappings || {};
- const adhocLabels = defaultMappings["Adhoc Volunteer / Exposure Session"] || defaultMappings["Adhoc Volunteer"] ||[];
- 
- defaultFieldHeadersForAppV2Values = availableFields
-    .filter(f => adhocLabels.includes(f.label))
-    .map(f => f.value);
- 
- switchView('main-app-content');
- document.getElementById('app-v1-content').style.display = (appVersion === 'AppV1') ? 'flex' : 'none';
- document.getElementById('app-v2-content').style.display = (appVersion === 'AppV2') ? 'flex' : 'none';
- 
- if (appVersion === 'AppV1') initializeAppV1(profile);
- else initializeAppV2();
-}
-
-function initializeAppV1(profile) {
- selectedProfileForAppV1 = profile;
- populateTraineesForView('AppV1');
- populateFieldsForAppV1();
- areDefaultsSelected = true;
- const defaultButton = document.getElementById('defaultFieldsButton');
- defaultButton.classList.add('active');
- defaultButton.onclick = handleDefaultFieldsToggle;
- updateFieldsBasedOnDefaults();
-}
-
-function initializeAppV2() {
- populateTraineesForView('AppV2');
-}
-
-function populateTraineesForView(view) {
- const containerId = view === 'AppV1' ? 'traineeSelectionContainer' : 'traineeSelectionContainerV2';
- const checkAllId = view === 'AppV1' ? 'checkAllTrainees' : 'checkAllTraineesV2';
- const container = document.getElementById(containerId);
- totalTrainees = allTrainees.length;
- if (totalTrainees === 0) {
-   container.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--text-muted-color);"><i class="ph-bold ph-warning-circle text-2xl mb-2"></i><br>No active trainees found.</div>';
-   return;
- }
- const traineeHtml = allTrainees.map(t => {
-   const id = `${view.toLowerCase()}-trainee-${t.replace(/\W/g, '_')}`;
-   return `<label for="${id}"><input type="checkbox" value="${t}" id="${id}"><span>${t}</span></label>`;
- }).join('');
- container.innerHTML = traineeHtml;
- 
- container.querySelectorAll('input').forEach(input => input.addEventListener('change', () => updateTraineeCountForView(view)));
- document.getElementById(checkAllId).onchange = function() {
-   document.querySelectorAll(`#${containerId} input`).forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
-   updateTraineeCountForView(view);
- };
- updateTraineeCountForView(view);
-}
-
-function updateTraineeCountForView(view) {
- const containerId = view === 'AppV1' ? 'traineeSelectionContainer' : 'traineeSelectionContainerV2';
- const count = document.querySelectorAll(`#${containerId} input:checked`).length;
- const countTextId = view === 'AppV1' ? 'traineeCountText' : 'traineeCountTextV2';
- document.getElementById(countTextId).textContent = `${count} / ${totalTrainees}`;
-}
-
-function populateFieldsForAppV1() {
- const container = document.getElementById('fieldSelectionContainer');
- const fieldHtml = availableFields.map(field => {
-   const id = 'field-' + field.value.replace(/\W/g, '_');
-   return `<label for="${id}"><input type="checkbox" name="selectedField" value="${field.value}" id="${id}"><span>${field.label}</span></label>`;
- }).join('');
- container.innerHTML = fieldHtml;
- 
- document.getElementById('checkAllFields').onchange = function() {
-   document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
-   if (this.checked) {
-     areDefaultsSelected = false;
-     document.getElementById('defaultFieldsButton').classList.remove('active');
-   }
- };
-}
-
-function handleDefaultFieldsToggle() {
- areDefaultsSelected = !areDefaultsSelected;
- document.getElementById('defaultFieldsButton').classList.toggle('active', areDefaultsSelected);
- if (areDefaultsSelected) {
-   document.getElementById('checkAllFields').checked = false;
- }
- updateFieldsBasedOnDefaults();
-}
-
-function updateFieldsBasedOnDefaults() {
- const defaultMappings = appSettings.profileDefaultFieldMappings || {};
- const defaultLabels = defaultMappings[selectedProfileForAppV1] ||[];
- document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => {
-   const field = availableFields.find(f => f.value === cb.value);
-   cb.checked = areDefaultsSelected && field && defaultLabels.includes(field.label);
- });
-}
-
-function handleGenerate() {
- const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainer input:checked')).map(cb => cb.value);
- const fields = Array.from(document.querySelectorAll('#fieldSelectionContainer input:checked')).map(cb => cb.value);
- if (trainees.length === 0 || fields.length === 0) { 
-     showToast("Select at least 1 trainee and 1 field.", true); 
-     return; 
- }
- runGeneration(trainees, fields, 'AppV1');
-}
-
-function handleGenerateV2() {
- const trainees = Array.from(document.querySelectorAll('#traineeSelectionContainerV2 input:checked')).map(cb => cb.value);
- if (trainees.length === 0) { 
-     showToast("Select at least 1 trainee.", true); 
-     return; 
- }
- runGeneration(trainees, defaultFieldHeadersForAppV2Values, 'AppV2');
-}
-
-function runGeneration(trainees, fields, fromView) {
- previousAppView = fromView;
- setLoadingState(true, 'Compiling Info Card(s)...');
- 
- callBackend('generateCueCardBatch', {
-   selectedTrainees: trainees,
-   selectedFieldHeaders: fields,
-   profile: currentProfile
- })
- .then(displayBatchResults)
- .catch(err => {
-     setLoadingState(false);
-     switchView('app-results-view');
-     displayBatchResults([{ status: 'error', name: 'System Error', message: err.message }]);
- });
-}
-
-function displayBatchResults(results) {
- const resultDiv = document.getElementById('resultMessage');
- const successIcon = `<i class="ph-bold ph-check-circle text-green-500 text-2xl mt-0.5 flex-shrink-0"></i>`;
- const errorIcon = `<i class="ph-bold ph-warning-circle text-red-500 text-2xl mt-0.5 flex-shrink-0"></i>`;
- 
- const resultsHtml = results.map(item => {
-   const icon = item.status === 'success' ? successIcon : errorIcon;
-   let content;
-   if (item.status === 'success') {
-     content = `<div class="flex-grow"><strong class="text-base">${item.name}</strong><br><a href="#" class="open-link text-sm mt-1 inline-block" data-name="${item.name}">Open Info Card <i class="ph-bold ph-arrow-square-out"></i></a></div>`;
-   } else {
-     content = `<div class="flex-grow"><strong class="text-base">${item.name}</strong><br><span class="text-sm opacity-70">Failed. ${item.message || "Unknown"}</span></div>`;
-   }
-   return `<div class="result-item ${item.status} shadow-sm">${icon}${content}</div>`;
- }).join('');
- 
- resultDiv.innerHTML = resultsHtml;
- 
- resultDiv.querySelectorAll('.open-link').forEach(link => {
-   link.onclick = (e) => {
-     e.preventDefault();
-     const resultData = results.find(r => r.name === e.currentTarget.dataset.name); // use currentTarget
-     if (resultData && resultData.htmlContent) {
-       const newWindow = window.open('', '_blank');
-       if (newWindow) {
-         newWindow.document.write(resultData.htmlContent);
-         newWindow.document.close();
-       } else {
-         showToast('Popup blocked! Allow popups to view.', true);
-       }
-     }
-   };
- });
- 
- setLoadingState(false);
- switchView('app-results-view');
-}
-
-function backToSelections() {
- switchView('main-app-content');
- document.getElementById(previousAppView === 'AppV1' ? 'app-v1-content' : 'app-v2-content').style.display = 'flex';
-}
-
-function goToLandingPage() {
- location.reload();
+async function handleSavePasswords() {
+  const p = {
+    'Regular Volunteer': document.getElementById('set-regPass').value,
+    'Adhoc Volunteer': document.getElementById('set-adhocPass').value,
+    'Settings': document.getElementById('set-adminPass').value
+  };
+  if(!p['Regular Volunteer'] && !p['Adhoc Volunteer'] && !p['Settings']) return showToast("No passwords entered.", true);
+  showToast("Updating...", false);
+  try {
+    await callBackend('updatePasswords', { passwords: p });
+    showToast("Passwords Updated!");
+  } catch(e) { showToast(e.message, true); }
 }
 </script>
 </body>
