@@ -1,5 +1,5 @@
 const ENV_CONFIG = {
-  ACTIVE_ENV: 'DEV', // Set to 'PROD', 'DEV', or 'EXP'
+  ACTIVE_ENV: 'PROD', // Set to 'PROD', 'DEV', or 'EXP'
   
   URLS: {
     DEV: 'https://script.google.com/macros/s/AKfycby48gbzI_4V0TEJ0Gra4Qb_J3xywBA6A792d2reGx0QWUx-6QFEKRWBTmr8mGG86osg/exec',
