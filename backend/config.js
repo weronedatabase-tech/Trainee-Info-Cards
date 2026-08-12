@@ -1,18 +1,22 @@
-// ==========================================
-// config.js - Application Configuration
-// ==========================================
-// ENVIRONMENT TOGGLE
-// Options: 'Exp' (Experimental) | 'Dev' (Development) | 'Prod' (Production)
-const ENV = 'Prod';
+const ENV_CONFIG = {
+  ACTIVE_ENV: 'DEV', // Set to 'PROD', 'DEV', or 'EXP'
+  
+  URLS: {
+    DEV: 'https://script.google.com/macros/s/AKfycby48gbzI_4V0TEJ0Gra4Qb_J3xywBA6A792d2reGx0QWUx-6QFEKRWBTmr8mGG86osg/exec',
+    PROD: 'https://script.google.com/macros/s/AKfycbz4OLZtR2lX97MrGZVaNg13Lrzvwgy7mBfQr7PgoQGK617sL8ZCkKvZD2hIZodus-O_/exec',
+    EXP: 'https://script.google.com/macros/s/AKfycby48gbzI_4V0TEJ0Gra4Qb_J3xywBA6A792d2reGx0QWUx-6QFEKRWBTmr8mGG86osg/exec' // Currently using DEV URL as placeholder
+  },
+  
+  SHEETS: {
+    DEV: '1E1GPV36RLHn7p4gHmdHB2zedtZJF2_Zb3ncGXZZTy5Y',
+    PROD: '1IbxJY59urIChYaLrwURWrOEBBrLNDiOqDO-w6LwP1xI',
+    EXP: '1E1GPV36RLHn7p4gHmdHB2zedtZJF2_Zb3ncGXZZTy5Y'
+  },
+  
+  DRIVE_FOLDER_ID: '1nMFek_9bTttYPVW_vlV1eOfawDz3RGy-'
+};
 
-// ENVIRONMENT API ENDPOINTS (Google Apps Script Web App URLs)
-const EXP_URL = 'https://script.google.com/macros/s/AKfycbz5lEH75nTIX2epTYjirnSesn0Lt7HAUrczaEYTL031haBWzNaQSw9FmOowU_5jD1TY/exec';
-const DEV_URL = 'https://script.google.com/macros/s/AKfycbz5lEH75nTIX2epTYjirnSesn0Lt7HAUrczaEYTL031haBWzNaQSw9FmOowU_5jD1TY/exec';
-const PROD_URL = 'https://script.google.com/macros/s/AKfycbyEop3q0sfBjN4PXt3FoRJL2byI9wpez-Bp0N4PQ8kGJjb3AJqhZoSxyjcmKWlgfZkZIw/exec';
-const API_URL = ENV === 'Exp' ? EXP_URL : (ENV === 'Dev' ? DEV_URL : PROD_URL);
-
-// ENVIRONMENT Google Drive Folders (Google Drive Folder IDs) for the trainee photos
-const EXP_Drive_Folder_ID = '1nMFek_9bTttYPVW_vlV1eOfawDz3RGy-';
-const DEV_Drive_Folder_ID= '1nMFek_9bTttYPVW_vlV1eOfawDz3RGy-';
-const PROD_Drive_Folder_ID = '1nMFek_9bTttYPVW_vlV1eOfawDz3RGy-';
-const Drive_Folder_ID = ENV === 'Exp' ? EXP_Drive_Folder_ID : (ENV === 'Dev' ? DEV_Drive_Folder_ID : PROD_Drive_Folder_ID);
+// Export configuration so it works safely in both Google Apps Script and modern Node/Browser contexts.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ENV_CONFIG;
+}
