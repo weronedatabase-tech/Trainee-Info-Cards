@@ -274,23 +274,43 @@ let isHydrating = false;
 let isWriting = false; // Mutation lock
 let idleHydrationQueue = [];
 
+// ==========================================
+// EXPONENTIAL BACKOFF FOR GAS RATE LIMITS
+// ==========================================
+async function callBackend(action, payload = {}, retries = 3, backoffDelay = 1500) {
+  try {
+    const response = await fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, payload })
+    });
+    const text = await response.text();
+    let result;
+    try { 
+      result = JSON.parse(text); 
+    } catch(e) { 
+      // This catches Google's HTML error pages ("Too many simultaneous executions")
+      throw new Error("Connection failed or rate limited."); 
+    }
+    if (!result.success) throw new Error(result.error);
+    return result.data;
+  } catch (error) {
+    if (retries > 0) {
+      console.warn(`[API] Retrying '${action}' in ${backoffDelay}ms... (${retries} left)`);
+      await new Promise(resolve => setTimeout(resolve, backoffDelay));
+      return callBackend(action, payload, retries - 1, backoffDelay * 1.5);
+    } else {
+      throw new Error(`Failed to connect after multiple attempts. Please try again.`);
+    }
+  }
+}
+
+// Background initial load
 let dataPromise = callBackend('getInitialData').then(d => { appData = d; return d; }).catch(e => console.error(e));
 
 if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
 if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
 
-async function callBackend(action, payload = {}) {
-  const response = await fetch(GAS_WEB_APP_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, payload })
-  });
-  const text = await response.text();
-  let result;
-  try { result = JSON.parse(text); } catch(e) { throw new Error("Connection failed. Check permissions."); }
-  if (!result.success) throw new Error(result.error);
-  return result.data;
-}
 
 // ==========================================
 // ZERO-LATENCY HYDRATION (PILLAR 3)
@@ -298,7 +318,6 @@ async function callBackend(action, payload = {}) {
 function startIdleHydration() {
   if (!appData || isHydrating) return;
   isHydrating = true;
-  // Deep copy the array to prevent mutation issues
   idleHydrationQueue = [...appData.allTrainees];
   
   const processQueue = async () => {
@@ -306,18 +325,17 @@ function startIdleHydration() {
          isHydrating = false;
          return;
      }
-     if (isWriting) { // Pause if admin is mutating data (Prevent polling collisions)
+     if (isWriting) { 
          setTimeout(processQueue, 3000);
          return;
      }
      const name = idleHydrationQueue.shift();
      if (!localTraineeCache[name]) {
          try {
-             const data = await callBackend('getTraineeCardData', { traineeName: name, profile: currentProfile });
+             const data = await callBackend('getTraineeCardData', { traineeName: name, profile: currentProfile }, 1, 3000);
              localTraineeCache[name] = data;
          } catch(e) { /* Silent background fail */ }
      }
-     // Debounced processing to avoid swamping GAS quotas
      setTimeout(processQueue, 1500);
   };
   processQueue();
@@ -361,7 +379,17 @@ async function handleGeneralLogin() {
   btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Verifying...'; btn.disabled = true;
 
   try {
-    if (!appData) await dataPromise;
+    // LAZY INITIALIZATION RECOVERY
+    if (!appData) {
+       btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Loading App Data...';
+       try {
+           appData = await dataPromise;
+           if (!appData) throw new Error("Promise did not return data.");
+       } catch(fallbackErr) {
+           appData = await callBackend('getInitialData');
+       }
+    }
+
     const profile = await callBackend('login', { password: pass });
     btn.innerHTML = '<i class="ph-bold ph-sign-in text-xl"></i> Login'; btn.disabled = false;
 
