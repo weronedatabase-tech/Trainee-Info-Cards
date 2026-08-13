@@ -119,6 +119,9 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
       <div class="flex flex-col"><span class="font-bold text-sm leading-none">Trainee Info</span><span class="text-xs opacity-60 uppercase tracking-widest mt-0.5">Mobile Portal</span></div>
     </div>
     <div class="flex items-center gap-2">
+       <button onclick="forceRefreshApp()" class="p-1 text-gray-600 dark:text-gray-300 hover:text-blue-500 transition outline-none focus:outline-none" title="Refresh App">
+         <i class="ph-bold ph-arrows-clockwise text-xl"></i>
+       </button>
        <button onclick="openAdminSettingsAuth()" class="p-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition outline-none focus:outline-none" title="Admin Settings">
          <i class="ph-fill ph-gear text-xl"></i>
        </button>
@@ -310,6 +313,40 @@ let dataPromise = callBackend('getInitialData').then(d => { appData = d; return 
 
 if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
 if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+
+
+// ==========================================
+// CACHE PURGE & HARD RELOAD LOGIC
+// ==========================================
+async function forceRefreshApp() {
+  showToast("Purging local cache & reloading...");
+
+  // Wipe memory
+  appData = null;
+  localTraineeCache = {};
+  idleHydrationQueue = [];
+  
+  // Wipe device storage while intelligently preserving the theme
+  const currentTheme = localStorage.getItem('theme');
+  localStorage.clear();
+  sessionStorage.clear();
+  if (currentTheme) localStorage.setItem('theme', currentTheme);
+
+  // Force-kill any lingering Service Workers that might serve stale assets
+  if ('serviceWorker' in navigator) {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let reg of registrations) {
+        await reg.unregister();
+      }
+    } catch (e) { console.error('SW unregister failed:', e); }
+  }
+
+  // Force cache-busting hard reload of the application
+  setTimeout(() => {
+    window.location.href = window.location.href.split('?')[0] + '?t=' + new Date().getTime();
+  }, 600);
+}
 
 
 // ==========================================
