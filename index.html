@@ -27,30 +27,34 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 </script>
 
 <style>
-  :root { 
-    --bg-color: #f3f4f6; 
-    --text-color: #111827; 
-    --glass-bg: rgba(255, 255, 255, 0.8); 
-    --glass-border: rgba(0, 0, 0, 0.1); 
-    --glass-strong-bg: #ffffff; 
-    --input-bg: #ffffff; 
-    --input-border: #d1d5db; 
+  :root {
+    --bg-color: #f3f4f6;
+    --text-color: #111827;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-strong-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #d1d5db;
+    --skeleton-base: #e5e7eb;
+    --skeleton-shine: #f3f4f6;
   }
-  .dark { 
-    --bg-color: #0f172a; 
-    --text-color: #e2e8f0; 
-    --glass-bg: rgba(30, 41, 59, 0.7); 
-    --glass-border: rgba(255, 255, 255, 0.1); 
-    --glass-strong-bg: rgba(15, 23, 42, 0.95); 
-    --input-bg: #1e293b; 
-    --input-border: #334155; 
+  .dark {
+    --bg-color: #0f172a;
+    --text-color: #e2e8f0;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-strong-bg: rgba(15, 23, 42, 0.95);
+    --input-bg: #1e293b;
+    --input-border: #334155;
+    --skeleton-base: #334155;
+    --skeleton-shine: #1e293b;
   }
 
   body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
-  
+
   .glass { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); }
   .glass-strong { background: var(--glass-strong-bg); }
-  
+
   .fade-in { animation: fadeIn 0.3s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -82,8 +86,20 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .checkbox-list-wrapper { max-height: 200px; overflow-y: auto; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); }
   .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.4rem; padding: 0.65rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; font-size: 0.8rem; color: var(--text-color); }
   .checkbox-list-wrapper input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: #3b82f6; cursor: pointer; }
-  
+
   .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; z-index: 1000; }
+
+  /* Skeleton Loading Animation */
+  .skeleton {
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
+    background-size: 400% 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+    border-radius: 0.5rem;
+  }
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
 </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -125,7 +141,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
     </div>
     <h2 class="text-2xl font-bold mb-1 leading-tight">Access Portal</h2>
     <p class="opacity-70 mb-6 text-sm">Enter your access code to continue.</p>
-    
+
     <form onsubmit="event.preventDefault(); handleGeneralLogin();">
       <div class="mb-4 relative">
         <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
@@ -147,12 +163,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
           <option value="" disabled selected>Select Trainee to View...</option>
       </select>
     </div>
-    
-    <div id="loader-view" class="hidden text-center py-12">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-      <p class="opacity-70 text-sm animate-pulse">Fetching Profile...</p>
-    </div>
-    
+
     <div id="card-container" class="space-y-3 pb-10"></div>
   </main>
 </div>
@@ -165,7 +176,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
      <h3 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-lock-key text-blue-500"></i> Admin Access</h3>
      <button onclick="closePasswordModal()" class="opacity-60 hover:opacity-100 transition-opacity outline-none focus:outline-none"><i class="ph-bold ph-x text-xl"></i></button>
    </div>
-   
+
    <form onsubmit="event.preventDefault(); handleAdminAuth();">
      <div class="mb-6">
        <p id="admin-error-msg" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
@@ -186,15 +197,23 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 <div id="modal-settings" class="fixed inset-0 flex items-center justify-center hidden" style="z-index: 100;">
   <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" onclick="toggleSettingsModal(false)"></div>
   <div class="glass-strong w-full h-full md:h-auto md:max-w-xl p-5 md:rounded-2xl shadow-2xl relative overflow-y-auto flex flex-col fade-in" style="max-height: 90vh;">
-    
+
     <!-- Modal Header -->
     <div class="flex justify-between items-center mb-4 shrink-0 border-b border-opacity-10 pb-3" style="border-color: var(--glass-border);">
       <h2 class="text-xl font-bold flex items-center gap-2"><i class="ph-bold ph-gear text-blue-500"></i> Admin Settings</h2>
       <button onclick="toggleSettingsModal(false)" class="outline-none focus:outline-none"><i class="ph-bold ph-x text-xl opacity-60 hover:opacity-100"></i></button>
     </div>
-    
+
     <!-- Modal Content -->
     <div class="space-y-6 pb-6">
+      
+      <!-- System Cache CRON trigger -->
+      <div class="p-4 rounded-xl" style="background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.3);">
+          <h3 class="font-bold mb-1 flex items-center gap-2"><i class="ph-bold ph-database text-purple-500"></i> System Cache Memory</h3>
+          <p class="text-xs opacity-70 mb-3">Pre-compute all trainee data into high-speed memory for 0ms load times.</p>
+          <button onclick="runSystemCacheRebuild()" id="btn-admin-cache" class="bg-purple-600 text-white font-bold text-sm px-4 py-2 w-full rounded-lg shadow-md hover:bg-purple-700 outline-none focus:outline-none">Rebuild Global Cache</button>
+      </div>
+
       <!-- Generation Tool -->
       <div class="p-4 rounded-xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);">
           <h3 class="font-bold mb-1 flex items-center gap-2"><i class="ph-bold ph-magic-wand text-blue-500"></i> AI Card Generator</h3>
@@ -219,7 +238,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
                <div class="checkbox-list-wrapper"><div id="settings-adhoc-fields" class="flex flex-col"></div></div>
              </div>
          </div>
-         <button onclick="handleSaveFieldSettings()" class="bg-green-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90 outline-none focus:outline-none">Save Field Mappings</button>
+         <button id="btn-save-fields" onclick="handleSaveFieldSettings()" class="bg-green-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90 outline-none focus:outline-none">Save Field Mappings</button>
       </div>
 
       <!-- Passwords -->
@@ -230,7 +249,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
              <div><label class="block text-xs font-bold opacity-60 mb-1">ADHOC VOL.</label><input type="text" id="set-adhocPass" class="input-field py-1.5 px-2 text-sm"></div>
              <div><label class="block text-xs font-bold opacity-60 mb-1">ADMIN SETTINGS</label><input type="text" id="set-adminPass" class="input-field py-1.5 px-2 text-sm"></div>
          </div>
-         <button onclick="handleSavePasswords()" class="bg-yellow-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90 outline-none focus:outline-none">Update Passwords Only</button>
+         <button id="btn-save-pass" onclick="handleSavePasswords()" class="bg-yellow-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90 outline-none focus:outline-none">Update Passwords Only</button>
       </div>
 
       <!-- Close Button -->
@@ -244,10 +263,16 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
 <script>
 // ==========================================
-// BACKGROUND DATA LOAD
+// BACKGROUND DATA LOAD & CONCURRENCY STATE
 // ==========================================
 let appData = null;
 let currentProfile = '';
+let localTraineeCache = {}; // Zero-latency memory store
+let latestFetchId = 0; // Timestamp-Based Stale Payload Rejection
+let isHydrating = false;
+let isWriting = false; // Mutation lock
+let idleHydrationQueue = [];
+
 let dataPromise = callBackend('getInitialData').then(d => { appData = d; return d; }).catch(e => console.error(e));
 
 if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
@@ -267,6 +292,37 @@ async function callBackend(action, payload = {}) {
 }
 
 // ==========================================
+// ZERO-LATENCY HYDRATION (PILLAR 3)
+// ==========================================
+function startIdleHydration() {
+  if (!appData || isHydrating) return;
+  isHydrating = true;
+  // Deep copy the array to prevent mutation issues
+  idleHydrationQueue = [...appData.allTrainees];
+  
+  const processQueue = async () => {
+     if (idleHydrationQueue.length === 0 || !currentProfile) {
+         isHydrating = false;
+         return;
+     }
+     if (isWriting) { // Pause if admin is mutating data (Prevent polling collisions)
+         setTimeout(processQueue, 3000);
+         return;
+     }
+     const name = idleHydrationQueue.shift();
+     if (!localTraineeCache[name]) {
+         try {
+             const data = await callBackend('getTraineeCardData', { traineeName: name, profile: currentProfile });
+             localTraineeCache[name] = data;
+         } catch(e) { /* Silent background fail */ }
+     }
+     // Debounced processing to avoid swamping GAS quotas
+     setTimeout(processQueue, 1500);
+  };
+  processQueue();
+}
+
+// ==========================================
 // UI LOGIC & FLOW
 // ==========================================
 function toggleTheme(save = true) {
@@ -283,15 +339,14 @@ function togglePasswordIcon(btn, id) {
 
 function showToast(msg, isError = false) {
   const el = document.getElementById('toast');
-  el.innerText = msg;
+  document.getElementById('toast-msg').innerText = msg;
   el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
-  
-  // Safe color application
+
   el.classList.remove("text-red-500", "border-red-500", "bg-red-500", "bg-opacity-10", "text-blue-500", "border-blue-500", "bg-blue-500");
-  
   if(isError) el.classList.add("text-red-500", "border-red-500", "bg-red-500", "bg-opacity-10");
   else el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500", "bg-opacity-10");
-  
+
+  el.classList.remove('hidden');
   if(window.tTimer) clearTimeout(window.tTimer);
   window.tTimer = setTimeout(() => el.classList.add('hidden'), 3500);
 }
@@ -302,50 +357,52 @@ async function handleGeneralLogin() {
   const btn = document.getElementById('general-login-btn');
   if(!pass) return err.classList.remove('hidden');
 
-  btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Verifying...'; btn.disabled = true;
+  btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Verifying...'; btn.disabled = true;
 
   try {
-    if (!appData) await dataPromise; // Ensure bg-load completed
+    if (!appData) await dataPromise;
     const profile = await callBackend('login', { password: pass });
-    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; btn.disabled = false;
-    
+    btn.innerHTML = '<i class="ph-bold ph-sign-in text-xl"></i> Login'; btn.disabled = false;
+
     if (profile === 'Settings') return openAdminSettingsAuth(true);
     if (profile) {
        currentProfile = profile;
-       
-       // Update and show user badge
        const badge = document.getElementById('user-badge');
        badge.innerText = profile;
-       badge.className = profile === 'Regular Volunteer' 
+       badge.className = profile === 'Regular Volunteer'
           ? 'self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-500 bg-opacity-20 text-green-500 border border-green-500 border-opacity-30'
           : 'self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-yellow-500 bg-opacity-20 text-yellow-500 border border-yellow-500 border-opacity-30';
        badge.classList.remove('hidden');
-       
-       // Show logout button
+
        document.getElementById('btn-logout').classList.remove('hidden');
-       
        populateTraineeSelect('trainee-select');
        document.getElementById('landing-page').style.display = 'none';
        document.getElementById('main-app-content').style.display = 'flex';
+
+       // Initiate invisible pre-fetch for zero-latency clicks
+       startIdleHydration();
     } else {
        err.innerText = "Incorrect Password"; err.classList.remove('hidden');
     }
   } catch(e) {
-    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; btn.disabled = false;
+    btn.innerHTML = '<i class="ph-bold ph-sign-in text-xl"></i> Login'; btn.disabled = false;
     err.innerText = "Error: " + e.message; err.classList.remove('hidden');
   }
 }
 
 function logout() {
   currentProfile = '';
+  localTraineeCache = {};
+  isHydrating = false;
+  idleHydrationQueue = [];
+  
   document.getElementById('general-password-input').value = '';
   document.getElementById('card-container').innerHTML = '';
   document.getElementById('trainee-select').value = '';
-  
-  // Hide badge and logout button
+
   document.getElementById('user-badge').classList.add('hidden');
   document.getElementById('btn-logout').classList.add('hidden');
-  
+
   document.getElementById('main-app-content').style.display = 'none';
   document.getElementById('landing-page').style.display = 'flex';
 }
@@ -353,28 +410,61 @@ function logout() {
 function populateTraineeSelect(id, includeAll = false) {
   if (!appData) return;
   const select = document.getElementById(id);
-  select.innerHTML = (includeAll ? '<option value="ALL">All Trainees (Batch)</option>' : '<option value="" disabled selected>Select Trainee...</option>') 
+  select.innerHTML = (includeAll ? '<option value="ALL">All Trainees (Batch)</option>' : '<option value="" disabled selected>Select Trainee to View...</option>')
                    + appData.allTrainees.map(t => `<option value="${t}">${t}</option>`).join('');
 }
 
 // ==========================================
-// VIEWER ENGINE
+// VIEWER ENGINE & SKELETON UI (PILLAR 1 & 3)
 // ==========================================
 function formatText(t) { return String(t).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); }
+
+function getSkeletonHTML() {
+  return `
+    <div class="glass p-5 rounded-3xl shadow-sm text-center mb-4 fade-in">
+       <div class="skeleton w-32 h-32 rounded-full mx-auto shadow-md mb-3 border-4 border-transparent"></div>
+       <div class="skeleton h-8 w-3/4 mx-auto rounded-lg"></div>
+    </div>
+    <div class="glass p-4 rounded-2xl shadow-sm mb-3 fade-in">
+       <div class="skeleton h-6 w-1/2 mb-4 rounded"></div>
+       <div class="skeleton h-4 w-full mb-2 rounded"></div>
+       <div class="skeleton h-4 w-5/6 rounded"></div>
+    </div>
+    <div class="glass p-4 rounded-2xl shadow-sm mb-3 fade-in">
+       <div class="skeleton h-6 w-1/3 mb-4 rounded"></div>
+       <div class="skeleton h-4 w-full mb-2 rounded"></div>
+       <div class="skeleton h-4 w-4/5 rounded"></div>
+    </div>
+  `;
+}
 
 async function fetchTraineeInfo() {
   const name = document.getElementById('trainee-select').value;
   if (!name) return;
-  
-  document.getElementById('card-container').innerHTML = '';
-  document.getElementById('loader-view').classList.remove('hidden');
-  
+
+  // Stale Payload Rejection Timestamp Setup
+  const fetchId = Date.now();
+  latestFetchId = fetchId;
+
+  // Optimistic UI skeleton rendering
+  document.getElementById('card-container').innerHTML = getSkeletonHTML();
+
+  // Zero-latency memory hit
+  if (localTraineeCache[name]) {
+     if (latestFetchId !== fetchId) return; // Discard if user switched rapidly
+     renderTraineeCard(localTraineeCache[name]);
+     return;
+  }
+
   try {
      const data = await callBackend('getTraineeCardData', { traineeName: name, profile: currentProfile });
-     document.getElementById('loader-view').classList.add('hidden');
+     // Strict check to prevent UI overwrites from old requests (Pillar 1)
+     if (latestFetchId !== fetchId) return; 
+     localTraineeCache[name] = data;
      renderTraineeCard(data);
   } catch (e) {
-     document.getElementById('loader-view').classList.add('hidden');
+     if (latestFetchId !== fetchId) return;
+     document.getElementById('card-container').innerHTML = `<div class="text-red-500 text-center p-4">Error: ${e.message}</div>`;
      showToast(e.message, true);
   }
 }
@@ -384,7 +474,7 @@ function renderTraineeCard(data) {
   if (data.photoBase64) html += `<img src="data:${data.photoMime};base64,${data.photoBase64}" class="w-32 h-32 object-cover rounded-full mx-auto shadow-md mb-3 border-4 border-blue-500">`;
   else html += `<div class="w-32 h-32 rounded-full mx-auto shadow-inner mb-3 bg-gray-200 dark:bg-gray-800 flex items-center justify-center border-4 border-gray-400"><i class="ph-bold ph-user text-5xl text-gray-400"></i></div>`;
   html += `<h2 class="text-2xl font-bold leading-tight">${formatText(data.fullName)}</h2></div>`;
-  
+
   if (!data.categories || data.categories.length === 0) {
      html += `<div class="text-center opacity-70 p-4">No specific fields assigned for viewing.</div>`;
   } else {
@@ -406,10 +496,10 @@ function renderTraineeCard(data) {
 }
 
 // ==========================================
-// ADMIN SETTINGS
+// ADMIN SETTINGS WITH MUTATION LOCKS
 // ==========================================
-function toggleSettingsModal(show) { 
-  document.getElementById('modal-settings').classList.toggle('hidden', !show); 
+function toggleSettingsModal(show) {
+  document.getElementById('modal-settings').classList.toggle('hidden', !show);
 }
 
 function openAdminSettingsAuth(skipPass = false) {
@@ -438,8 +528,8 @@ async function handleAdminAuth() {
      if(valid) {
          closePasswordModal();
          loadAdminDashboard();
-     } else { 
-         document.getElementById('admin-error-msg').classList.remove('hidden'); 
+     } else {
+         document.getElementById('admin-error-msg').classList.remove('hidden');
      }
   } catch(e) { showToast(e.message, true); }
   btn.innerHTML = "Unlock"; btn.disabled = false;
@@ -448,61 +538,108 @@ async function handleAdminAuth() {
 function loadAdminDashboard() {
   toggleSettingsModal(true);
   populateTraineeSelect('admin-regen-select', true);
-  
+
   if(!appData) return;
   const regDef = appData.appSettings.profileDefaultFieldMappings['Regular Volunteer'] ||[];
   const adhocDef = appData.appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] ||[];
-  
+
   document.getElementById('settings-regular-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${regDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');
   document.getElementById('settings-adhoc-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${adhocDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');['set-regPass', 'set-adhocPass', 'set-adminPass'].forEach(id => document.getElementById(id).value = '');
 }
 
+async function runSystemCacheRebuild() {
+  if(isWriting) return showToast("A mutation process is running.", true);
+  const btn = document.getElementById('btn-admin-cache');
+  btn.innerText = "Rebuilding Cache (Please Wait)..."; btn.disabled = true;
+  isWriting = true;
+  
+  try {
+    const res = await callBackend('adminRebuildSystemCache');
+    showToast(res);
+  } catch(e) { 
+    showToast(e.message, true); 
+  } finally {
+    isWriting = false;
+    btn.innerText = "Rebuild Global Cache"; btn.disabled = false;
+  }
+}
+
 async function runAdminGeneration() {
+  if(isWriting) return showToast("A mutation process is running.", true);
   const sel = document.getElementById('admin-regen-select').value;
   const stat = document.getElementById('admin-regen-status');
   const btn = document.getElementById('btn-admin-gen');
-  
+
   let list = sel === 'ALL' ? appData.allTrainees : [sel];
   if(list.length === 0) return;
-  
+
+  isWriting = true; // Lock local background polling
   stat.classList.remove('hidden'); btn.disabled = true; btn.style.opacity = '0.5';
-  
+
   for(let i=0; i<list.length; i++) {
      stat.innerText = `Processing ${i+1}/${list.length} : ${list[i]}`;
-     try { await callBackend('adminGenerateCardText', { traineeName: list[i] }); }
+     try { 
+       await callBackend('adminGenerateCardText', { traineeName: list[i] }); 
+       // Invalidate local memory since it changed on backend
+       delete localTraineeCache[list[i]];
+     }
      catch(e) { console.error("Failed for", list[i], e); }
   }
-  
+
   stat.innerText = "Completed!";
   setTimeout(() => stat.classList.add('hidden'), 3000);
   btn.disabled = false; btn.style.opacity = '1';
+  isWriting = false;
 }
 
 async function handleSaveFieldSettings() {
+  if(isWriting) return showToast("A mutation process is running.", true);
+  const btn = document.getElementById('btn-save-fields');
   const newMappings = {
     "Regular Volunteer": Array.from(document.querySelectorAll('#settings-regular-fields input:checked')).map(cb => cb.value),
     "Adhoc Volunteer / Exposure Session": Array.from(document.querySelectorAll('#settings-adhoc-fields input:checked')).map(cb => cb.value)
   };
-  showToast("Saving...", false);
+  
+  isWriting = true;
+  btn.innerText = "Saving..."; btn.disabled = true;
   try {
     await callBackend('saveAppSettings', { newMappings });
     showToast("Field Settings Saved!");
+    localTraineeCache = {}; // Purge local memory so mappings refresh on next click
   } catch(e) { showToast(e.message, true); }
+  isWriting = false;
+  btn.innerText = "Save Field Mappings"; btn.disabled = false;
 }
 
 async function handleSavePasswords() {
+  if(isWriting) return showToast("A mutation process is running.", true);
+  const btn = document.getElementById('btn-save-pass');
   const p = {
     'Regular Volunteer': document.getElementById('set-regPass').value,
     'Adhoc Volunteer': document.getElementById('set-adhocPass').value,
     'Settings': document.getElementById('set-adminPass').value
   };
   if(!p['Regular Volunteer'] && !p['Adhoc Volunteer'] && !p['Settings']) return showToast("No passwords entered.", true);
-  showToast("Updating...", false);
+  
+  isWriting = true;
+  btn.innerText = "Updating..."; btn.disabled = true;
   try {
     await callBackend('updatePasswords', { passwords: p });
     showToast("Passwords Updated!");
   } catch(e) { showToast(e.message, true); }
+  isWriting = false;
+  btn.innerText = "Update Passwords Only"; btn.disabled = false;
 }
+</script>
+
+<!-- Service Worker Registration for caching integrity -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // In a real setup, sw.js would be hosted alongside index.html
+      // navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup skipped or failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
